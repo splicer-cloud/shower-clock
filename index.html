@@ -154,6 +154,18 @@
         #reset-btn:hover { color: #ffffff; }
         #reset-btn svg { width: 5vmin; height: 5vmin; fill: currentColor; }
 
+        /* Landscape Mode: Bigger text, optimized spacing */
+        @media (orientation: landscape) {
+            #clock-container { padding: 4vmin 10vmin; }
+            #time { font-size: 40vmin; }
+            #seconds { font-size: 12vmin; }
+            #ampm { font-size: 12vmin; }
+            #date { font-size: 7vmin; }
+            #stopwatch-label { font-size: 4vmin; }
+            #stopwatch { font-size: 10vmin; }
+            #reset-btn svg { width: 7vmin; height: 7vmin; }
+        }
+
         /* Hover/Tap bounce effect */
         #clock-container:active {
             transform: scale(0.95);
