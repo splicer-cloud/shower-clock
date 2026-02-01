@@ -92,6 +92,15 @@
             text-align: left;
         }
 
+        #ampm {
+            font-size: 8vmin;
+            margin-left: 15px;
+            font-weight: 400;
+            color: #ffffff;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+        }
+
         #date {
             font-size: 5vmin;
             font-weight: 500;
@@ -139,6 +148,7 @@
         <div id="time-wrapper">
             <div id="time">00:00</div>
             <div id="seconds">00</div>
+            <div id="ampm">AM</div>
         </div>
         <div id="date">Monday, Jan 01</div>
 
@@ -160,6 +170,7 @@
             let h = now.getHours();
             let m = now.getMinutes();
             let s = now.getSeconds();
+            const ampm = h >= 12 ? 'PM' : 'AM';
             
             h = h % 12 || 12; 
             m = m < 10 ? '0' + m : m;
@@ -167,6 +178,7 @@
             
             document.getElementById('time').textContent = `${h}:${m}`;
             document.getElementById('seconds').textContent = s;
+            document.getElementById('ampm').textContent = ampm;
 
             const options = { weekday: 'long', month: 'short', day: 'numeric' };
             document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
