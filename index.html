@@ -73,7 +73,7 @@
         }
 
         #time {
-            font-size: 30vmin;
+            font-size: 35vmin;
             line-height: 0.9;
             font-weight: 700;
             color: #ffffff;
@@ -100,16 +100,6 @@
             color: #ffffff;
             font-variant-numeric: tabular-nums;
             font-feature-settings: "tnum";
-        }
-
-        #date {
-            font-size: 5vmin;
-            font-weight: 500;
-            margin-top: 5px;
-            text-transform: capitalize;
-            letter-spacing: 1px;
-            color: #ffffff;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         /* Shower Timer Styling */
@@ -172,10 +162,9 @@
         /* Landscape Mode: Bigger text, optimized spacing */
         @media (orientation: landscape) {
             #clock-container { padding: 4vmin 10vmin; }
-            #time { font-size: 40vmin; }
+            #time { font-size: 55vmin; }
             #seconds { font-size: 12vmin; }
             #ampm { font-size: 12vmin; }
-            #date { font-size: 7vmin; }
             #stopwatch-label { font-size: 4vmin; }
             #stopwatch { font-size: 10vmin; }
             #reset-btn svg { width: 7vmin; height: 7vmin; }
@@ -198,7 +187,6 @@
             <div id="seconds">00</div>
             <div id="ampm">AM</div>
         </div>
-        <div id="date">Monday, Jan 01</div>
 
         <!-- Stopwatch for Shower Timing -->
         <div id="stopwatch-wrapper">
@@ -245,9 +233,6 @@
             document.getElementById('time').textContent = `${h}:${m}`;
             document.getElementById('seconds').textContent = s;
             document.getElementById('ampm').textContent = ampm;
-
-            const options = { weekday: 'long', month: 'short', day: 'numeric' };
-            document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
 
             // --- Stopwatch / Shower Timer Logic ---
             const elapsedMs = Date.now() - sessionStartTime;
