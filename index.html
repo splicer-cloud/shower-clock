@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Updated Viewport to prevent zooming/bouncing for a more "App-like" feel -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- iOS / Android Web App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0d1b5c">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- CUSTOM ICON CONFIGURATION -->
+    <!-- Updated with specific sizes and cache-busters to force iOS detection -->
+    <link rel="apple-touch-icon" sizes="180x180" href="icon.png?v=2">
+    <link rel="apple-touch-icon" href="icon.png?v=2">
+    <link rel="icon" type="image/png" href="icon.png?v=2">
+
+    <!-- Inline Manifest for Android Standalone Mode -->
+    <link rel="manifest" href='data:application/manifest+json,{"name": "Channel 9 Forecast", "short_name": "Channel 9", "start_url": ".", "display": "standalone", "background_color": "#0d1b5c", "theme_color": "#0d1b5c", "icons": [{"src": "icon.png", "sizes": "192x192", "type": "image/png"}]}'>
+
+    <title>Channel 9 - Local Forecast & Radio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'VT323', monospace;
+            background: linear-gradient(to bottom, #0d1b5c 0%, #15298a 100%);
+            color: #fff;
+            overflow: hidden; /* Keep app-like feel */
+            height: 100vh;
+            /* Use dynamic viewport height for mobile browsers */
+            height: 100dvh; 
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .text-retro-gold {
+            color: #d4af37;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+        }
+        
+        .text-shadow {
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+        }
+
+        .panel-border {
+            border: 2px solid #fff;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+            background: rgba(0,0,50, 0.2);
+        }
+
+        /* --- CRT Overlay --- */
+        .crt-overlay {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            position: absolute;
+            animation: scan 6s linear infinite;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        /* --- Marquee --- */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .marquee-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll-left 45s linear infinite;
+        }
+        @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* --- Retro Scrollbar --- */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1b5c; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4af37; 
+            border: 1px solid #fff;
+        }
+
+        /* Hide Scrollbar Utilities */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CRT Effects -->
+    <div class="absolute inset-0 crt-overlay"></div>
+    <div class="scanline"></div>
+
+    <!-- Hidden Audio Player -->
+    <audio id="bg-music" crossorigin="anonymous">
+        <!-- Source is set dynamically via JS -->
+    </audio>
+
+    <!-- Mute Toggle (Absolute Top Left) -->
+    <button id="mute-toggle" class="absolute top-4 right-4 z-[60] text-retro-gold text-3xl md:text-4xl drop-shadow-md hover:text-white transition-colors cursor-pointer" title="Toggle Sound">
+        🔇
+    </button>
+
+    <!-- Main TV Interface: Full screen with flex layout -->
+    <div class="relative w-full h-full flex flex-col p-4 md:p-8 z-10 overflow-hidden">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center md:items-end border-b-4 border-white pb-2 mb-4 shrink-0 relative">
+            <div class="text-center md:text-left z-50">
+                <h1 class="text-4xl md:text-6xl text-retro-gold font-bold tracking-widest uppercase filter drop-shadow-md leading-none">Local Forecast</h1>
+                
+                <!-- Search Component -->
+                <div class="relative inline-block mt-1 group">
+                    <h2 id="location-display" onclick="toggleSearch()" class="text-xl md:text-3xl text-white text-shadow cursor-pointer hover:text-yellow-300 transition-colors select-none flex items-center justify-center md:justify-start gap-2">
+                        <span>FANWOOD, NJ</span>
+                        <span class="text-xs text-retro-gold animate-pulse">▼</span>
+                    </h2>
+                    
+                    <!-- Dropdown Panel -->
+                    <div id="search-dropdown" class="hidden absolute top-full left-0 mt-2 w-64 bg-[#0d1b5c] border-2 border-white shadow-2xl z-[100]">
+                        <input 
+                            type="text" 
+                            id="city-search-input" 
+                            placeholder="SEARCH CITY..." 
+                            class="w-full bg-blue-900/50 text-white p-3 font-bold uppercase placeholder-blue-300 outline-none border-b border-white/30"
+                            onkeyup="handleSearch(this.value)"
+                        >
+                        <div id="search-results" class="max-h-48 overflow-y-auto">
+                            <!-- Results will appear here -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="text-center md:text-right mt-2 md:mt-0 pointer-events-none">
+                <div id="clock-time" class="text-4xl md:text-6xl text-shadow font-bold leading-none">--:--:--</div>
+                <div id="clock-date" class="text-xl md:text-3xl text-retro-gold uppercase">JAN 01</div>
+            </div>
+        </div>
+
+        <!-- Main Content: Scrollable on mobile if needed -->
+        <div class="flex-1 overflow-y-auto md:overflow-visible min-h-0 relative" onclick="closeSearchIfOpen(event)">
+            <!-- Grid: Single column on mobile, 12-col on desktop -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 pb-24 md:pb-0 h-auto md:h-full">
+                
+                <!-- LEFT COLUMN: Current + Hourly -->
+                <div class="md:col-span-5 flex flex-col gap-4 md:gap-6 h-auto md:h-full min-h-0">
+                    
+                    <!-- Current Weather Panel -->
+                    <div class="bg-blue-900/30 p-4 md:p-6 panel-border flex flex-col justify-center shrink-0">
+                        <h3 class="text-2xl md:text-4xl text-retro-gold underline decoration-4 underline-offset-4 mb-2 md:mb-4">CURRENTLY</h3>
+                        <div class="flex items-center justify-between md:justify-start space-x-4 mb-2 md:mb-4">
+                            <div id="current-icon" class="text-6xl md:text-8xl">☁️</div>
+                            <div>
+                                <div id="current-desc" class="text-xl md:text-3xl uppercase text-shadow">CLOUDY</div>
+                                <div id="current-temp" class="text-5xl md:text-7xl font-bold text-shadow">--°</div>
+                            </div>
+                        </div>
+                        <div class="space-y-1 md:space-y-2 text-xl md:text-3xl text-shadow">
+                            <div class="flex justify-between border-b border-white/20 pb-1">
+                                <span>WIND</span><span id="current-wind" class="text-yellow-300">--</span>
+                            </div>
+                            <div class="flex justify-between border-b border-white/20 pb-1">
+                                <span>HUMIDITY</span><span id="current-humid" class="text-yellow-300">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hourly Forecast Panel (Horizontal Scroll) -->
+                    <div class="bg-blue-900/30 p-4 md:p-6 panel-border flex flex-col h-auto md:flex-1 min-h-0">
+                        <h3 class="text-2xl md:text-3xl text-retro-gold underline decoration-2 underline-offset-4 mb-2 md:mb-4">24-HOUR FORECAST</h3>
+                        
+                        <!-- Horizontal container -->
+                        <div id="hourly-container" class="flex flex-row gap-4 overflow-x-auto scrollbar-hide p-1 cursor-grab active:cursor-grabbing select-none">
+                             <div class="text-xl md:text-2xl animate-pulse text-center mt-4 w-full">LOADING HOURLY DATA...</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN: 10-Day Forecast (Vertical Scroll) -->
+                <div class="md:col-span-7 bg-blue-900/30 p-4 md:p-6 panel-border flex flex-col h-96 md:h-full min-h-0">
+                    <h3 class="text-2xl md:text-4xl text-retro-gold underline decoration-4 underline-offset-4 mb-4 md:mb-6">10-DAY OUTLOOK</h3>
+                    
+                    <!-- Vertical Scroll Container -->
+                    <div id="forecast-container" class="flex-1 overflow-y-auto space-y-2 pr-2">
+                        <div class="text-xl md:text-3xl animate-pulse text-center mt-4 w-full">RECEIVING SATELLITE DATA...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Sunset Footer Indicator -->
+    <div class="absolute bottom-16 md:bottom-20 left-0 w-full flex justify-center pointer-events-none z-30">
+         <div class="bg-blue-900/90 px-4 py-1 border border-white/40 shadow-lg text-center backdrop-blur-sm">
+            <span id="sunset-label" class="text-retro-gold text-2xl md:text-3xl uppercase">SUNSET TODAY: </span>
+            <span id="sunset-time" class="text-white text-2xl md:text-3xl font-bold text-shadow animate-pulse">--:-- PM</span>
+         </div>
+    </div>
+
+    <!-- Marquee Footer: Fixed at bottom -->
+    <div class="absolute bottom-0 left-0 w-full h-10 md:h-12 bg-red-700 border-t-2 border-white flex items-center shadow-lg overflow-hidden z-40">
+        <div class="bg-red-800 z-20 px-3 md:px-6 h-full flex items-center font-bold text-xl md:text-3xl border-r-2 border-white shadow-xl shrink-0">
+            ALERTS
+        </div>
+        <div class="marquee-container flex-1">
+            <div id="ticker-text" class="marquee-content text-xl md:text-3xl font-bold pt-1">
+                INITIALIZING NEWS FEED...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Weather Logic ---
+        let LAT = 40.64;
+        let LON = -74.39;
+        let locationName = "FANWOOD, NJ";
+
+        async function fetchNews() {
+            try {
+                // Fetch top stories from Hacker News API (Real Tech News)
+                const res = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json');
+                const ids = await res.json();
+                const topIds = ids.slice(0, 3); // Get top 3
+                const stories = await Promise.all(topIds.map(id => fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`).then(r => r.json())));
+                return stories.map(s => s.title.toUpperCase());
+            } catch (e) {
+                console.error("News Error", e);
+                return ["NEWS SYSTEM OFFLINE", "RETRYING CONNECTION..."];
+            }
+        }
+
+        async function updateTicker() {
+            try {
+                const newsHeadlines = await fetchNews();
+                const newsString = newsHeadlines.join("... ");
+                document.getElementById('ticker-text').textContent = `${newsString}...`;
+            } catch (e) {
+                console.error("News Ticker Error:", e);
+                document.getElementById('ticker-text').textContent = "NEWS FEED OFFLINE... CHECKING SATELLITE LINK...";
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock-time').textContent = now.toLocaleTimeString('en-US');
+            document.getElementById('clock-date').textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' }).toUpperCase();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        async function fetchWeather() {
+            try {
+                // Requesting 10 days via forecast_days parameter
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true&hourly=relativehumidity_2m,temperature_2m,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,sunset&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=auto&forecast_days=10`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                updateUI(data);
+                
+            } catch (error) {
+                console.error("Weather Fail", error);
+                document.getElementById('forecast-container').innerHTML = `<div class="text-red-300 text-center text-xl md:text-2xl">DATA LINK SEVERED</div>`;
+            }
+        }
+
+        function getIcon(code, hour = null) {
+            const isNight = hour !== null && (hour >= 21 || hour < 6);
+
+            if (code === 0) return isNight ? '🌙' : '☀️';
+            if (code <= 3) return isNight ? '🌙' : '⛅';
+            if (code <= 48) return '🌫️';
+            if (code <= 67) return '🌧️';
+            if (code <= 77) return '🌨️';
+            if (code >= 95) return '⚡';
+            return '❓';
+        }
+
+        function getDesc(code) {
+            if (code === 0) return 'CLEAR';
+            if (code <= 3) return 'CLOUDY';
+            if (code <= 48) return 'FOGGY';
+            if (code <= 67) return 'RAINY';
+            if (code >= 95) return 'STORMY';
+            return 'UNK';
+        }
+
+        function updateUI(data) {
+            // Current
+            const cur = data.current_weather;
+            document.getElementById('current-temp').textContent = Math.round(cur.temperature) + "°F";
+            document.getElementById('current-wind').textContent = cur.windspeed + " MPH";
+            document.getElementById('current-desc').textContent = getDesc(cur.weathercode);
+            
+            const currentHour = new Date().getHours();
+            document.getElementById('current-icon').textContent = getIcon(cur.weathercode, currentHour);
+            
+            if (data.hourly && data.hourly.relativehumidity_2m) {
+                document.getElementById('current-humid').textContent = (data.hourly.relativehumidity_2m[currentHour] || '--') + "%";
+            }
+
+            // Sunset
+            if (data.daily && data.daily.sunset && data.daily.sunset[0]) {
+                const now = new Date();
+                let sunsetDate = new Date(data.daily.sunset[0]);
+                let labelText = "SUNSET TODAY: ";
+
+                if (now > sunsetDate && data.daily.sunset[1]) {
+                    sunsetDate = new Date(data.daily.sunset[1]);
+                    labelText = "SUNSET TOMORROW: ";
+                }
+
+                const sunsetTime = sunsetDate.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'});
+                document.getElementById('sunset-time').textContent = sunsetTime;
+                document.getElementById('sunset-label').textContent = labelText;
+            }
+
+            // --- 10-Day Forecast (Vertical List) ---
+            const daily = data.daily;
+            const container = document.getElementById('forecast-container');
+            container.innerHTML = '';
+
+            // Using min of 10 or returned length
+            const daysToShow = Math.min(10, daily.time.length);
+
+            for (let i = 0; i < daysToShow; i++) {
+                const date = new Date(daily.time[i]);
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' }).toUpperCase();
+                const max = Math.round(daily.temperature_2m_max[i]);
+                const min = Math.round(daily.temperature_2m_min[i]);
+                const icon = getIcon(daily.weathercode[i]);
+
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between border-b border-white/20 pb-2 text-xl md:text-3xl last:border-0";
+                row.innerHTML = `
+                    <div class="w-1/3 text-yellow-300 truncate">${dayName}</div>
+                    <div class="w-1/6 text-center text-2xl md:text-4xl">${icon}</div>
+                    <div class="w-1/3 text-right">
+                        <span class="text-white font-bold">${max}°</span> 
+                        <span class="text-gray-300 text-lg md:text-2xl">/ ${min}°</span>
+                    </div>
+                `;
+                container.appendChild(row);
+            }
+
+            // --- Hourly Forecast (Horizontal) ---
+            const hourlyContainer = document.getElementById('hourly-container');
+            hourlyContainer.innerHTML = '';
+            
+            if (data.hourly) {
+                // Find current hour index
+                // Show next 24 hours
+                for (let i = 0; i < 24; i++) {
+                    const idx = currentHour + i;
+                    // Check bounds
+                    if (idx >= data.hourly.time.length) break;
+
+                    const temp = Math.round(data.hourly.temperature_2m[idx]);
+                    const code = data.hourly.weathercode[idx];
+                    
+                    // Format time (e.g., 2 PM)
+                    const dateObj = new Date(data.hourly.time[idx]);
+                    const h = dateObj.getHours();
+                    const icon = getIcon(code, h);
+                    
+                    const timeStr = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+
+                    const div = document.createElement('div');
+                    // Styling for horizontal strip
+                    div.className = "flex-shrink-0 w-20 flex flex-col items-center justify-center gap-1 border-r border-white/10 last:border-0";
+                    div.innerHTML = `
+                        <div class="text-yellow-300 text-lg md:text-xl">${timeStr}</div>
+                        <div class="text-3xl md:text-4xl my-1">${icon}</div>
+                        <div class="text-white text-xl md:text-2xl font-bold">${temp}°</div>
+                    `;
+                    hourlyContainer.appendChild(div);
+                }
+            }
+        }
+
+        // --- Search Logic ---
+        let searchTimeout;
+
+        function toggleSearch() {
+            const dropdown = document.getElementById('search-dropdown');
+            dropdown.classList.toggle('hidden');
+            if(!dropdown.classList.contains('hidden')) {
+                document.getElementById('city-search-input').focus();
+            }
+        }
+
+        function closeSearchIfOpen(e) {
+            const dropdown = document.getElementById('search-dropdown');
+            if (!dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('hidden');
+            }
+        }
+
+        function handleSearch(query) {
+            clearTimeout(searchTimeout);
+            const resultsDiv = document.getElementById('search-results');
+            
+            if (query.length < 3) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    resultsDiv.innerHTML = '<div class="p-2 text-yellow-300 animate-pulse">SEARCHING...</div>';
+                    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=5&language=en&format=json`);
+                    const data = await res.json();
+                    
+                    resultsDiv.innerHTML = '';
+                    
+                    if (!data.results) {
+                        resultsDiv.innerHTML = '<div class="p-2 text-red-300">NO SIGNAL</div>';
+                        return;
+                    }
+
+                    data.results.forEach(city => {
+                        const div = document.createElement('div');
+                        div.className = "p-2 hover:bg-white hover:text-blue-900 cursor-pointer border-b border-white/10 transition-colors truncate";
+                        div.innerHTML = `${city.name}, <span class="text-sm opacity-70">${city.admin1 || ''} ${city.country_code}</span>`;
+                        div.onclick = () => selectCity(city);
+                        resultsDiv.appendChild(div);
+                    });
+
+                } catch (e) {
+                    console.error(e);
+                    resultsDiv.innerHTML = '<div class="p-2 text-red-300">ERR</div>';
+                }
+            }, 500);
+        }
+
+        function selectCity(city) {
+            LAT = city.latitude;
+            LON = city.longitude;
+            locationName = `${city.name}, ${city.admin1 || city.country_code}`.toUpperCase();
+            
+            document.querySelector('#location-display span').textContent = locationName;
+            document.getElementById('search-dropdown').classList.add('hidden');
+            document.getElementById('city-search-input').value = '';
+            document.getElementById('search-results').innerHTML = '';
+            
+            document.getElementById('forecast-container').innerHTML = `<div class="text-xl md:text-3xl animate-pulse text-center mt-4 md:mt-10">RETUNING SATELLITE...</div>`;
+            document.getElementById('hourly-container').innerHTML = `<div class="text-xl md:text-2xl animate-pulse text-center mt-4 w-full">LOADING HOURLY DATA...</div>`;
+            fetchWeather();
+        }
+
+        // --- App Timers ---
+        updateTicker(); // Initial news fetch
+        setInterval(updateTicker, 180000); // Refresh news every 3 minutes
+        setInterval(fetchWeather, 600000); // Refresh weather every 10 minutes
+
+        // --- 2. AUDIO PLAYLIST LOGIC ---
+        const playlist = ['smoothjazz.mp3', 'smoothjazz2.mp3'];
+        // Pick a random starting index
+        let currentTrackIndex = Math.floor(Math.random() * playlist.length);
+        const audio = document.getElementById('bg-music');
+        const muteBtn = document.getElementById('mute-toggle');
+        audio.volume = 0.3; 
+
+        // Initialize source
+        audio.src = playlist[currentTrackIndex];
+
+        // Event: When track ends, play next
+        audio.addEventListener('ended', () => {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            audio.src = playlist[currentTrackIndex];
+            audio.play().catch(e => console.error("Auto-play failed:", e));
+        });
+
+        function updateMuteIcon() {
+            if (audio.paused || audio.muted) {
+                muteBtn.textContent = '🔇';
+            } else {
+                muteBtn.textContent = '🔊';
+            }
+        }
+
+        muteBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                // If paused (due to autoplay block), try to play
+                audio.play().then(() => {
+                    audio.muted = false;
+                    updateMuteIcon();
+                }).catch(e => console.error("Playback failed:", e));
+            } else {
+                // If playing, toggle mute state
+                audio.muted = !audio.muted;
+                updateMuteIcon();
+            }
+        });
+
+        // --- Drag to Scroll & Mouse Wheel Logic for Hourly Forecast ---
+        const hourlyScrollContainer = document.getElementById('hourly-container');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        hourlyScrollContainer.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - hourlyScrollContainer.offsetLeft;
+            scrollLeft = hourlyScrollContainer.scrollLeft;
+        });
+        hourlyScrollContainer.addEventListener('mouseleave', () => {
+            isDown = false;
+        });
+        hourlyScrollContainer.addEventListener('mouseup', () => {
+            isDown = false;
+        });
+        hourlyScrollContainer.addEventListener('mousemove', (e) => {
+            if(!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - hourlyScrollContainer.offsetLeft;
+            const walk = (x - startX) * 2; // Scroll speed
+            hourlyScrollContainer.scrollLeft = scrollLeft - walk;
+        });
+        
+        // Enable mouse wheel horizontal scrolling
+        hourlyScrollContainer.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                hourlyScrollContainer.scrollLeft += e.deltaY;
+            }
+        });
+
+        // APP INITIALIZATION
+        function initApp() {
+            // 1. Try to start audio immediately
+            audio.play().then(() => {
+                updateMuteIcon();
+            }).catch(() => {
+                // Autoplay blocked - show muted state
+                updateMuteIcon();
+            });
+
+            // 2. Request Geolocation immediately
+            if (navigator.geolocation) {
+                document.querySelector('#location-display span').textContent = "LOCATING...";
+                
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        LAT = position.coords.latitude;
+                        LON = position.coords.longitude;
+                        
+                        try {
+                            const res = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${LAT}&longitude=${LON}&language=en`);
+                            if (!res.ok) throw new Error('Geocoding API non-200');
+
+                            const data = await res.json();
+                            const city = (data.results && data.results[0]) ? data.results[0] : null;
+
+                            if(city) {
+                                const parts = [city.name, city.admin1 || city.country_code].filter(Boolean);
+                                locationName = parts.slice(0, 2).join(', ').toUpperCase(); 
+                            } else {
+                                throw new Error("No results from Open-Meteo");
+                            }
+                        } catch(e) {
+                            console.warn("Open-Meteo reverse geo failed, trying fallback...", e);
+                            try {
+                                const res2 = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${LAT}&longitude=${LON}&localityLanguage=en`);
+                                const data2 = await res2.json();
+                                if (data2.city || data2.locality || data2.principalSubdivision) {
+                                     const cityName = data2.city || data2.locality || "Unknown City";
+                                     const region = data2.principalSubdivisionCode || data2.countryCode || "";
+                                     locationName = `${cityName}, ${region}`.toUpperCase();
+                                } else {
+                                     locationName = `LAT:${LAT.toFixed(2)} LON:${LON.toFixed(2)}`;
+                                }
+                            } catch (e2) {
+                                console.error("All reverse geo failed", e2);
+                                locationName = `LAT:${LAT.toFixed(2)} LON:${LON.toFixed(2)}`;
+                            }
+                        }
+                        
+                        document.querySelector('#location-display span').textContent = locationName;
+                        fetchWeather(); 
+                    },
+                    (error) => {
+                        console.log("Geolocation denied or error:", error);
+                        document.querySelector('#location-display span').textContent = locationName;
+                    }
+                );
+            } else {
+                fetchWeather(); 
+            }
+        }
+
+        // Run Init
+        window.addEventListener('load', initApp);
+
+    </script>
+</body>
+</html>
