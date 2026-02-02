@@ -40,29 +40,28 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Forced Widescreen Orientation Hack */
+        /* Forced Widescreen Orientation Hack for iPhone */
         @media (orientation: portrait) {
             #clock-container {
                 transform: rotate(90deg);
-                width: 98vh !important; 
-                height: 94vw !important; 
+                /* Width is based on the device height in portrait */
+                width: 96vh !important; 
+                height: 90vw !important; 
             }
-            /* Even wider slots for portrait-rotated view */
-            #time span { width: 1.3ch !important; } 
-            #time .colon { width: 0.7ch !important; }
-            #time { font-size: 20vh !important; } /* Scaled down to fit the massive spread */
-            #seconds, #ampm { font-size: 5.5vh !important; }
+            #time { font-size: 18vh !important; } 
+            #time span { width: 1.1ch !important; }
+            #time .colon { width: 0.6ch !important; }
+            #seconds, #ampm { font-size: 5vh !important; }
             #stopwatch { font-size: 7vh !important; }
-            #stopwatch span { width: 1.2ch !important; }
         }
 
         #clock-container {
             position: relative;
             text-align: center;
             z-index: 10;
-            padding: 8vh 2vw; 
-            width: 98vw;
-            max-width: 99%;
+            padding: 6vh 4vw; 
+            width: 96vw;
+            max-width: 100%;
             box-sizing: border-box;
             background: var(--cloud-bg);
             backdrop-filter: blur(var(--cloud-blur));
@@ -72,64 +71,79 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
             cursor: pointer;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Prevent any wrapping within the main container */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         #time-wrapper {
             display: flex;
+            flex-direction: row;
             align-items: baseline;
             justify-content: center;
             color: #ffffff;
+            width: 100%;
+            white-space: nowrap; /* CRITICAL: Prevents line breaks */
         }
 
-        /* Slot logic: Massive width for the ultra-spread look */
+        /* Number Grid Logic: Each character gets a reserved, centered slot */
         #time span, #seconds span, #stopwatch span {
             display: inline-block;
             text-align: center;
+            flex-shrink: 0; /* Prevents the slot from being squished */
             font-variant-numeric: tabular-nums;
             font-feature-settings: "tnum";
         }
 
         #time {
-            font-size: 24vw; /* Reduced font size to account for huge tracking spread */
-            line-height: 0.9;
+            font-size: 18vw; 
+            line-height: 1;
             font-weight: 700;
             color: #ffffff;
             text-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: row;
         }
 
-        /* The "Ultra-Wide" Boxes */
-        #time span { width: 1.4ch; } 
-        #time .colon { width: 0.8ch; }
+        /* Spaced out slots - tuned to fit on one line */
+        #time span { width: 1.1ch; } 
+        #time .colon { width: 0.6ch; }
 
         #seconds {
             font-size: 5vw;
-            margin-left: 30px;
+            margin-left: 15px;
             font-weight: 400;
             opacity: 0.9;
+            display: flex;
+            flex-direction: row;
         }
-        #seconds span { width: 1.8ch; }
+        #seconds span { width: 1.2ch; }
 
         #ampm {
             font-size: 5vw;
             margin-left: 10px;
             font-weight: 400;
-            width: 3.5ch;
+            width: 3ch;
             text-align: left;
+            flex-shrink: 0;
         }
 
         #stopwatch-wrapper {
             margin-top: 3vh;
-            padding-top: 3vh;
+            padding-top: 2vh;
             border-top: 1px solid rgba(255, 255, 255, 0.2);
+            width: 80%;
         }
 
         #stopwatch-label {
-            font-size: 2.8vh;
+            font-size: 2.5vh;
             text-transform: uppercase;
-            letter-spacing: 8px; /* Increased letter spacing for the label too */
+            letter-spacing: 6px;
             font-weight: 700;
             color: var(--session-yellow);
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
@@ -137,9 +151,12 @@
             font-size: 7vw;
             font-weight: 700;
             color: #ffffff;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
         }
-        #stopwatch span { width: 1.3ch; }
-        #stopwatch .colon { width: 0.7ch; }
+        #stopwatch span { width: 1ch; }
+        #stopwatch .colon { width: 0.5ch; }
 
         #stopwatch-row {
             display: flex;
@@ -153,12 +170,13 @@
             cursor: pointer;
             color: rgba(255, 255, 255, 0.6);
             padding: 0;
-            margin-left: 30px;
+            margin-left: 20px;
             display: flex;
             align-items: center;
             transition: transform 0.2s ease, color 0.2s ease;
-            width: 5vw;
-            height: 5vw;
+            width: 4.5vw;
+            height: 4.5vw;
+            flex-shrink: 0;
         }
         #reset-btn:active { transform: rotate(-90deg); color: var(--session-yellow); }
         #reset-btn svg { width: 100%; height: 100%; fill: currentColor; }
@@ -244,8 +262,8 @@
             const isPortrait = window.innerHeight > window.innerWidth;
             const baseRotation = isPortrait ? 90 : 0;
             
-            const randomX = Math.floor(Math.random() * 16) - 8; 
-            const randomY = Math.floor(Math.random() * 16) - 8;
+            const randomX = Math.floor(Math.random() * 14) - 7; 
+            const randomY = Math.floor(Math.random() * 14) - 7;
             
             container.style.transform = `rotate(${baseRotation}deg) translate(${randomX}px, ${randomY}px)`;
         }
