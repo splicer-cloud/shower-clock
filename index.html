@@ -4,16 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Bubble Cloud Clock</title>
-    <!-- Importing a bubbly, rounded font -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
     <style>
         :root {
-            --text-color: #ffffff;
-            --cloud-bg: rgba(255, 255, 255, 0.15);
-            --cloud-blur: 18px;
+            --cloud-bg: rgba(255, 255, 255, 0.18);
+            --cloud-blur: 20px;
             --session-yellow: #ffeb3b;
         }
 
@@ -27,11 +25,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            touch-action: none;
             background-color: #000000;
             background-image: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
+            touch-action: none;
         }
 
         @keyframes gradientBG {
@@ -40,59 +38,57 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Forced Widescreen Orientation Hack for iPhone */
+        /* FORCED WIDESCREEN LOGIC 
+           When held portrait (vertical), we rotate 90deg.
+           We make the container width (which is physically the height) 
+           long enough to cover the whole phone.
+        */
         @media (orientation: portrait) {
             #clock-container {
                 transform: rotate(90deg);
-                /* Width is based on the device height in portrait */
-                width: 96vh !important; 
-                height: 90vw !important; 
+                width: 88vh !important; /* Physically 88% of screen length */
+                height: 80vw !important; /* Physically 80% of screen width */
             }
-            #time { font-size: 18vh !important; } 
+            #time { font-size: 18vh !important; }
             #time span { width: 1.1ch !important; }
             #time .colon { width: 0.6ch !important; }
-            #seconds, #ampm { font-size: 5vh !important; }
-            #stopwatch { font-size: 7vh !important; }
+            #seconds, #ampm { font-size: 5.5vh !important; }
+            #stopwatch { font-size: 8vh !important; }
+            #stopwatch span { width: 1.1ch !important; }
         }
 
         #clock-container {
             position: relative;
-            text-align: center;
-            z-index: 10;
-            padding: 6vh 4vw; 
-            width: 96vw;
-            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            width: 90vw;
             box-sizing: border-box;
             background: var(--cloud-bg);
             backdrop-filter: blur(var(--cloud-blur));
             -webkit-backdrop-filter: blur(var(--cloud-blur));
             border-radius: 80px;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             cursor: pointer;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            /* Prevent any wrapping within the main container */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
         }
 
         #time-wrapper {
             display: flex;
-            flex-direction: row;
             align-items: baseline;
             justify-content: center;
+            white-space: nowrap;
             color: #ffffff;
-            width: 100%;
-            white-space: nowrap; /* CRITICAL: Prevents line breaks */
         }
 
-        /* Number Grid Logic: Each character gets a reserved, centered slot */
+        /* Number boxes to prevent jumping */
         #time span, #seconds span, #stopwatch span {
             display: inline-block;
             text-align: center;
-            flex-shrink: 0; /* Prevents the slot from being squished */
+            flex-shrink: 0;
             font-variant-numeric: tabular-nums;
             font-feature-settings: "tnum";
         }
@@ -101,23 +97,20 @@
             font-size: 18vw; 
             line-height: 1;
             font-weight: 700;
-            color: #ffffff;
-            text-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            text-shadow: 0 8px 15px rgba(0,0,0,0.2);
             display: flex;
-            flex-direction: row;
         }
 
-        /* Spaced out slots - tuned to fit on one line */
+        /* The Big Spread */
         #time span { width: 1.1ch; } 
-        #time .colon { width: 0.6ch; }
+        #time .colon { width: 0.5ch; }
 
         #seconds {
             font-size: 5vw;
-            margin-left: 15px;
+            margin-left: 20px;
             font-weight: 400;
             opacity: 0.9;
             display: flex;
-            flex-direction: row;
         }
         #seconds span { width: 1.2ch; }
 
@@ -127,71 +120,68 @@
             font-weight: 400;
             width: 3ch;
             text-align: left;
-            flex-shrink: 0;
         }
 
         #stopwatch-wrapper {
-            margin-top: 3vh;
-            padding-top: 2vh;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            width: 80%;
+            width: 90%;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         #stopwatch-label {
-            font-size: 2.5vh;
+            font-size: 3vh;
             text-transform: uppercase;
             letter-spacing: 6px;
             font-weight: 700;
             color: var(--session-yellow);
             margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         #stopwatch {
-            font-size: 7vw;
+            font-size: 8vw;
             font-weight: 700;
             color: #ffffff;
             display: flex;
-            flex-direction: row;
-            justify-content: center;
         }
-        #stopwatch span { width: 1ch; }
+        #stopwatch span { width: 1.1ch; }
         #stopwatch .colon { width: 0.5ch; }
 
         #stopwatch-row {
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
 
         #reset-btn {
             background: none;
             border: none;
             cursor: pointer;
-            color: rgba(255, 255, 255, 0.6);
-            padding: 0;
-            margin-left: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 10px;
+            margin-left: 15px;
             display: flex;
             align-items: center;
-            transition: transform 0.2s ease, color 0.2s ease;
-            width: 4.5vw;
-            height: 4.5vw;
-            flex-shrink: 0;
+            transition: color 0.2s;
         }
-        #reset-btn:active { transform: rotate(-90deg); color: var(--session-yellow); }
-        #reset-btn svg { width: 100%; height: 100%; fill: currentColor; }
+        #reset-btn:active { color: var(--session-yellow); transform: scale(0.9); }
+        #reset-btn svg { width: 5vw; height: 5vw; fill: currentColor; }
 
         #myhyundai-btn {
             position: absolute;
-            bottom: 25px;
-            right: 25px;
+            bottom: 30px;
+            right: 30px;
             color: rgba(255, 255, 255, 0.2);
             text-decoration: none;
         }
-        #myhyundai-btn svg { width: 3.5vw; height: 3.5vw; fill: currentColor; }
+        #myhyundai-btn svg { width: 4vw; height: 4vw; fill: currentColor; }
 
         #clock-container:active {
-            transform: scale(0.99) !important;
+            transform: scale(0.98) !important;
         }
     </style>
 </head>
@@ -262,8 +252,9 @@
             const isPortrait = window.innerHeight > window.innerWidth;
             const baseRotation = isPortrait ? 90 : 0;
             
-            const randomX = Math.floor(Math.random() * 14) - 7; 
-            const randomY = Math.floor(Math.random() * 14) - 7;
+            // Subtle jitter for burn-in protection
+            const randomX = Math.floor(Math.random() * 10) - 5; 
+            const randomY = Math.floor(Math.random() * 10) - 5;
             
             container.style.transform = `rotate(${baseRotation}deg) translate(${randomX}px, ${randomY}px)`;
         }
