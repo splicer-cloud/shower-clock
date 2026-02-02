@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,15 +9,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
-    <!-- Custom App Icons -->
-    <link rel="icon" type="image/png" href="icon.png">
-    <link rel="apple-touch-icon" href="icon.png">
     <style>
         :root {
             --text-color: #ffffff;
-            /* Glassmorphism/Cloudy effect values */
             --cloud-bg: rgba(255, 255, 255, 0.15);
-            --cloud-blur: 15px;
+            --cloud-blur: 18px;
+            --session-yellow: #ffeb3b;
         }
 
         body, html {
@@ -32,7 +28,6 @@
             justify-content: center;
             align-items: center;
             touch-action: none;
-            /* Animated Gradient Background */
             background-color: #000000;
             background-image: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
             background-size: 400% 400%;
@@ -45,24 +40,38 @@
             100% { background-position: 0% 50%; }
         }
 
+        /* Forced Widescreen Orientation Hack */
+        @media (orientation: portrait) {
+            #clock-container {
+                transform: rotate(90deg);
+                width: 98vh !important; 
+                height: 94vw !important; 
+            }
+            /* Even wider slots for portrait-rotated view */
+            #time span { width: 1.3ch !important; } 
+            #time .colon { width: 0.7ch !important; }
+            #time { font-size: 20vh !important; } /* Scaled down to fit the massive spread */
+            #seconds, #ampm { font-size: 5.5vh !important; }
+            #stopwatch { font-size: 7vh !important; }
+            #stopwatch span { width: 1.2ch !important; }
+        }
+
         #clock-container {
             position: relative;
-            transition: transform 2s ease-in-out;
             text-align: center;
             z-index: 10;
-            padding: 8vmin 10vmin;
-            width: 90vw;
+            padding: 8vh 2vw; 
+            width: 98vw;
+            max-width: 99%;
             box-sizing: border-box;
-            font-variant-numeric: tabular-nums;
-            font-feature-settings: "tnum";
-            /* Cloudy / Glassmorphism Box */
             background: var(--cloud-bg);
             backdrop-filter: blur(var(--cloud-blur));
             -webkit-backdrop-filter: blur(var(--cloud-blur));
-            border-radius: 80px; /* Bubbly rounded corners */
+            border-radius: 80px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
             cursor: pointer;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #time-wrapper {
@@ -72,58 +81,65 @@
             color: #ffffff;
         }
 
+        /* Slot logic: Massive width for the ultra-spread look */
+        #time span, #seconds span, #stopwatch span {
+            display: inline-block;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+        }
+
         #time {
-            font-size: 35vmin;
+            font-size: 24vw; /* Reduced font size to account for huge tracking spread */
             line-height: 0.9;
             font-weight: 700;
             color: #ffffff;
             text-shadow: 0 10px 20px rgba(0,0,0,0.15);
-            font-variant-numeric: tabular-nums;
-            font-feature-settings: "tnum";
         }
 
+        /* The "Ultra-Wide" Boxes */
+        #time span { width: 1.4ch; } 
+        #time .colon { width: 0.8ch; }
+
         #seconds {
-            font-size: 8vmin;
-            margin-left: 15px;
+            font-size: 5vw;
+            margin-left: 30px;
             font-weight: 400;
-            color: #ffffff;
-            font-variant-numeric: tabular-nums;
-            font-feature-settings: "tnum";
-            width: 2ch;
+            opacity: 0.9;
+        }
+        #seconds span { width: 1.8ch; }
+
+        #ampm {
+            font-size: 5vw;
+            margin-left: 10px;
+            font-weight: 400;
+            width: 3.5ch;
             text-align: left;
         }
 
-        #ampm {
-            font-size: 8vmin;
-            margin-left: 15px;
-            font-weight: 400;
-            color: #ffffff;
-            font-variant-numeric: tabular-nums;
-            font-feature-settings: "tnum";
-        }
-
-        /* Shower Timer Styling */
         #stopwatch-wrapper {
-            margin-top: 25px;
-            padding-top: 15px;
+            margin-top: 3vh;
+            padding-top: 3vh;
             border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         #stopwatch-label {
-            font-size: 3vmin;
+            font-size: 2.8vh;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
-            opacity: 0.9;
+            letter-spacing: 8px; /* Increased letter spacing for the label too */
+            font-weight: 700;
+            color: var(--session-yellow);
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         #stopwatch {
-            font-size: 7vmin;
+            font-size: 7vw;
             font-weight: 700;
             color: #ffffff;
-            font-variant-numeric: tabular-nums;
-            font-feature-settings: "tnum";
         }
+        #stopwatch span { width: 1.3ch; }
+        #stopwatch .colon { width: 0.7ch; }
 
         #stopwatch-row {
             display: flex;
@@ -136,147 +152,123 @@
             border: none;
             cursor: pointer;
             color: rgba(255, 255, 255, 0.6);
-            padding: 0 0 0 10px;
+            padding: 0;
+            margin-left: 30px;
             display: flex;
             align-items: center;
-            transition: color 0.2s;
+            transition: transform 0.2s ease, color 0.2s ease;
+            width: 5vw;
+            height: 5vw;
         }
-        #reset-btn:hover { color: #ffffff; }
-        #reset-btn svg { width: 5vmin; height: 5vmin; fill: currentColor; }
+        #reset-btn:active { transform: rotate(-90deg); color: var(--session-yellow); }
+        #reset-btn svg { width: 100%; height: 100%; fill: currentColor; }
 
         #myhyundai-btn {
             position: absolute;
-            bottom: 35px;
-            right: 35px;
-            color: rgba(255, 255, 255, 0.3);
-            transition: color 0.2s, transform 0.2s;
-            display: flex;
+            bottom: 25px;
+            right: 25px;
+            color: rgba(255, 255, 255, 0.2);
             text-decoration: none;
         }
-        #myhyundai-btn:hover {
-            color: #ffffff;
-            transform: scale(1.1);
-        }
-        #myhyundai-btn svg { width: 6vmin; height: 6vmin; fill: currentColor; }
+        #myhyundai-btn svg { width: 3.5vw; height: 3.5vw; fill: currentColor; }
 
-        /* Landscape Mode: Bigger text, optimized spacing */
-        @media (orientation: landscape) {
-            #clock-container { padding: 4vmin 10vmin; }
-            #time { font-size: 55vmin; }
-            #seconds { font-size: 12vmin; }
-            #ampm { font-size: 12vmin; }
-            #stopwatch-label { font-size: 4vmin; }
-            #stopwatch { font-size: 10vmin; }
-            #reset-btn svg { width: 7vmin; height: 7vmin; }
-            #myhyundai-btn { bottom: 20px; right: 20px; }
-        }
-
-        /* Hover/Tap bounce effect */
         #clock-container:active {
-            transform: scale(0.95);
-            transition: 0.2s;
+            transform: scale(0.99) !important;
         }
-
     </style>
 </head>
 <body>
 
     <div id="clock-container">
         <div id="time-wrapper">
-            <div id="time">00:00</div>
-            <div id="seconds">00</div>
-            <div id="ampm">AM</div>
+            <div id="time"></div>
+            <div id="seconds"></div>
+            <div id="ampm"></div>
         </div>
 
-        <!-- Stopwatch for Shower Timing -->
         <div id="stopwatch-wrapper">
-            <div id="stopwatch-label">Session Time</div>
+            <div id="stopwatch-label">Session</div>
             <div id="stopwatch-row">
-                <div id="stopwatch">00:00</div>
+                <div id="stopwatch"></div>
                 <button id="reset-btn" aria-label="Reset Timer">
                     <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
                 </button>
             </div>
         </div>
 
-        <a id="myhyundai-btn" href="shortcuts://run-shortcut?name=MyHyundai" aria-label="Open MyHyundai App">
+        <a id="myhyundai-btn" href="shortcuts://run-shortcut?name=MyHyundai">
             <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
         </a>
     </div>
 
     <script>
-        // Record the time the app was opened
         let sessionStartTime = Date.now();
         let is24Hour = false;
 
+        function createSpannedText(text) {
+            return text.split('').map(char => {
+                const className = char === ':' ? 'class="colon"' : '';
+                return `<span ${className}>${char}</span>`;
+            }).join('');
+        }
+
         function updateClock() {
             const now = new Date();
-            
-            // --- Main Clock Logic ---
             let h = now.getHours();
-            let m = now.getMinutes();
-            let s = now.getSeconds();
+            let m = String(now.getMinutes()).padStart(2, '0');
+            let s = String(now.getSeconds()).padStart(2, '0');
             
-            let ampm = '';
+            let ampmText = '';
             if (!is24Hour) {
-                ampm = h >= 12 ? 'PM' : 'AM';
+                ampmText = h >= 12 ? 'PM' : 'AM';
                 h = h % 12 || 12;
                 document.getElementById('ampm').style.display = 'block';
             } else {
-                h = h < 10 ? '0' + h : h;
+                h = String(h).padStart(2, '0');
                 document.getElementById('ampm').style.display = 'none';
             }
-
-            m = m < 10 ? '0' + m : m;
-            s = s < 10 ? '0' + s : s;
             
-            document.getElementById('time').textContent = `${h}:${m}`;
-            document.getElementById('seconds').textContent = s;
-            document.getElementById('ampm').textContent = ampm;
+            document.getElementById('time').innerHTML = createSpannedText(`${h}:${m}`);
+            document.getElementById('seconds').innerHTML = createSpannedText(s);
+            document.getElementById('ampm').textContent = ampmText;
 
-            // --- Stopwatch / Shower Timer Logic ---
             const elapsedMs = Date.now() - sessionStartTime;
             const totalSeconds = Math.floor(elapsedMs / 1000);
-            
-            const stopM = Math.floor(totalSeconds / 60);
-            const stopS = totalSeconds % 60;
-            
-            const displayM = stopM < 10 ? '0' + stopM : stopM;
-            const displayS = stopS < 10 ? '0' + stopS : stopS;
-            
-            document.getElementById('stopwatch').textContent = `${displayM}:${displayS}`;
+            const stopM = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+            const stopS = String(totalSeconds % 60).padStart(2, '0');
+            document.getElementById('stopwatch').innerHTML = createSpannedText(`${stopM}:${stopS}`);
         }
 
-        // Burn-in protection: slightly shifts the container every 60 seconds
         function protectScreen() {
             const container = document.getElementById('clock-container');
-            const randomX = Math.floor(Math.random() * 30) - 15; 
-            const randomY = Math.floor(Math.random() * 30) - 15;
-            container.style.transform = `translate(${randomX}px, ${randomY}px)`;
+            const isPortrait = window.innerHeight > window.innerWidth;
+            const baseRotation = isPortrait ? 90 : 0;
+            
+            const randomX = Math.floor(Math.random() * 16) - 8; 
+            const randomY = Math.floor(Math.random() * 16) - 8;
+            
+            container.style.transform = `rotate(${baseRotation}deg) translate(${randomX}px, ${randomY}px)`;
         }
 
-        // Toggle 12/24h on container click
         document.getElementById('clock-container').addEventListener('click', () => {
             is24Hour = !is24Hour;
             updateClock();
         });
 
-        // Reset timer button
         document.getElementById('reset-btn').addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent toggling time format
+            e.stopPropagation();
             sessionStartTime = Date.now();
             updateClock();
         });
 
-        // Prevent Bluelink button from toggling time format
-        document.getElementById('myhyundai-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
+        document.getElementById('myhyundai-btn').addEventListener('click', (e) => e.stopPropagation());
 
         setInterval(updateClock, 1000);
         setInterval(protectScreen, 60000); 
         updateClock();
         protectScreen();
+
+        window.addEventListener('resize', protectScreen);
     </script>
 </body>
 </html>
