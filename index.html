@@ -26,7 +26,6 @@
             justify-content: center;
             align-items: center;
             background-color: #000000;
-            /* Background gradient will be overwritten by JS on load */
             background-image: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
@@ -44,19 +43,23 @@
         @media (orientation: portrait) {
             #clock-container {
                 transform: rotate(90deg);
-                width: 88vh !important; 
-                height: 80vw !important; 
+                width: 92vh !important; /* Slightly wider to give breathing room */
+                height: 85vw !important; /* Taller glass element */
+                padding: 6vw 5vh !important;
+                border-radius: 8vh !important;
             }
-            #time { font-size: 18vh !important; }
+            #time { font-size: 16vh !important; }
             #time span { width: 1.1ch !important; }
             #time .colon { width: 0.6ch !important; }
-            #seconds, #ampm { font-size: 5.5vh !important; }
+            #seconds, #ampm { font-size: 5vh !important; }
             #info-row { margin-top: 15px !important; padding-top: 15px !important; }
             .info-label { font-size: 2.5vh !important; }
-            #stopwatch { font-size: 7vh !important; }
+            #stopwatch { font-size: 6.5vh !important; }
             #stopwatch span { width: 1.1ch !important; }
-            .weather-icon { width: 26vh !important; height: 26vh !important; }
-            #weather-temp { font-size: 5vh !important; }
+            
+            /* Portrait weather proportions */
+            .weather-icon { width: 18vh !important; height: 18vh !important; }
+            #weather-temp { font-size: 4vh !important; }
         }
 
         #clock-container {
@@ -65,13 +68,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px;
-            width: 90vw;
+            padding: 5vh 5vw;
+            width: 92vw;
             box-sizing: border-box;
             background: var(--cloud-bg);
             backdrop-filter: blur(var(--cloud-blur));
             -webkit-backdrop-filter: blur(var(--cloud-blur));
-            border-radius: 80px;
+            border-radius: 6vw;
             border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -95,7 +98,7 @@
         }
 
         #time {
-            font-size: 18vw; 
+            font-size: 16vw; 
             line-height: 1;
             font-weight: 700;
             text-shadow: 0 8px 15px rgba(0,0,0,0.2);
@@ -106,7 +109,7 @@
         #time .colon { width: 0.5ch; }
 
         #seconds {
-            font-size: 5vw;
+            font-size: 4.5vw;
             margin-left: 20px;
             font-weight: 400;
             opacity: 0.9;
@@ -115,18 +118,18 @@
         #seconds span { width: 1.2ch; }
 
         #ampm {
-            font-size: 5vw;
+            font-size: 4.5vw;
             margin-left: 10px;
             font-weight: 400;
             width: 3ch;
             text-align: left;
         }
 
-        /* NEW BOTTOM ROW LAYOUT */
+        /* BOTTOM ROW LAYOUT */
         #info-row {
             width: 100%;
-            margin-top: 30px;
-            padding-top: 20px;
+            margin-top: 3vw;
+            padding-top: 3vw;
             border-top: 2px solid rgba(255, 255, 255, 0.15);
             display: flex;
             flex-direction: row;
@@ -142,7 +145,7 @@
         }
 
         .info-label {
-            font-size: 3vw;
+            font-size: 2.5vw;
             text-transform: uppercase;
             letter-spacing: 4px;
             font-weight: 700;
@@ -159,14 +162,14 @@
         }
 
         .weather-icon {
-            width: 24vw;
-            height: 24vw;
+            width: 16vw;
+            height: 16vw;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
         }
 
         #weather-temp {
             position: absolute;
-            font-size: 4.5vw;
+            font-size: 3.5vw;
             font-weight: 700;
             color: #ffffff;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -176,7 +179,7 @@
 
         /* STOPWATCH */
         #stopwatch {
-            font-size: 7vw;
+            font-size: 6.5vw;
             font-weight: 700;
             color: #ffffff;
             display: flex;
@@ -233,7 +236,7 @@
             <div id="weather-wrapper">
                 <div id="weather-icon-container">
                     <span id="weather-temp">--&deg;</span>
-                    <!-- Initial placeholder icon (will be replaced by JS) -->
+                    <!-- Initial placeholder icon -->
                     <svg viewBox="0 0 100 100" class="weather-icon" id="dynamic-weather-svg">
                         <path d="M 20 75 C 5 75 5 50 20 50 C 20 30 50 25 60 40 C 80 35 95 60 80 75 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
                     </svg>
@@ -260,7 +263,6 @@
     <script>
         // --- RANDOM BACKGROUND GENERATOR ---
         function randomizeBackground() {
-            // Generate vibrant pastel colors (Hue 0-360, Saturation 75-100%, Lightness 65-75%)
             const getPastel = () => {
                 const h = Math.floor(Math.random() * 360);
                 const s = Math.floor(Math.random() * 26) + 75; 
@@ -269,7 +271,7 @@
             };
             document.body.style.backgroundImage = `linear-gradient(-45deg, ${getPastel()}, ${getPastel()}, ${getPastel()}, ${getPastel()})`;
         }
-        randomizeBackground(); // Run on load
+        randomizeBackground();
 
         // --- CLOCK & STOPWATCH LOGIC ---
         let sessionStartTime = Date.now();
@@ -314,7 +316,6 @@
             const isPortrait = window.innerHeight > window.innerWidth;
             const baseRotation = isPortrait ? 90 : 0;
             
-            // Subtle jitter for burn-in protection
             const randomX = Math.floor(Math.random() * 10) - 5; 
             const randomY = Math.floor(Math.random() * 10) - 5;
             container.style.transform = `rotate(${baseRotation}deg) translate(${randomX}px, ${randomY}px)`;
@@ -329,9 +330,7 @@
             const svgEl = document.getElementById('dynamic-weather-svg');
             
             let iconHtml = '';
-            // WMO Weather Codes mapping
-            if (code === 0 || code === 1) {
-                // Sun
+            if (code === 0 || code === 1) { // Sun
                 iconHtml = `
                     <circle cx="50" cy="50" r="32" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3"/>
                     <line x1="50" y1="3" x2="50" y2="13" stroke="white" stroke-width="4" stroke-linecap="round"/>
@@ -343,24 +342,21 @@
                     <line x1="17" y1="83" x2="24" y2="76" stroke="white" stroke-width="4" stroke-linecap="round"/>
                     <line x1="83" y1="17" x2="76" y2="24" stroke="white" stroke-width="4" stroke-linecap="round"/>
                 `;
-            } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
-                // Rain
+            } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { // Rain
                 iconHtml = `
                     <path d="M 20 65 C 5 65 5 40 20 40 C 20 20 50 15 60 30 C 80 25 95 50 80 65 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
                     <line x1="30" y1="75" x2="25" y2="85" stroke="white" stroke-width="3" stroke-linecap="round"/>
                     <line x1="50" y1="75" x2="45" y2="85" stroke="white" stroke-width="3" stroke-linecap="round"/>
                     <line x1="70" y1="75" x2="65" y2="85" stroke="white" stroke-width="3" stroke-linecap="round"/>
                 `;
-            } else if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
-                // Snow
+            } else if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) { // Snow
                 iconHtml = `
                     <path d="M 20 65 C 5 65 5 40 20 40 C 20 20 50 15 60 30 C 80 25 95 50 80 65 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
                     <circle cx="30" cy="80" r="3" fill="white"/>
                     <circle cx="50" cy="80" r="3" fill="white"/>
                     <circle cx="70" cy="80" r="3" fill="white"/>
                 `;
-            } else {
-                // Cloud (Default)
+            } else { // Cloud
                 iconHtml = `
                     <path d="M 20 75 C 5 75 5 50 20 50 C 20 30 50 25 60 40 C 80 35 95 60 80 75 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
                 `;
@@ -383,7 +379,7 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => fetchWeatherData(pos.coords.latitude, pos.coords.longitude),
-                    (err) => fetchWeatherData(FALLBACK_LAT, FALLBACK_LON), // Fallback if denied
+                    (err) => fetchWeatherData(FALLBACK_LAT, FALLBACK_LON),
                     { timeout: 5000 }
                 );
             } else {
@@ -407,7 +403,6 @@
 
         setInterval(updateClock, 1000);
         setInterval(protectScreen, 60000); 
-        // Refresh weather every 30 minutes
         setInterval(initWeather, 30 * 60 * 1000); 
 
         updateClock();
@@ -418,7 +413,5 @@
     </script>
 </body>
 </html>
-
-
 
 
