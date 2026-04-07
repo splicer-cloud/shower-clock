@@ -6,8 +6,8 @@
     <title>Bubble Cloud Clock</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
     
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png?v=1">
+    <link rel="icon" type="image/png" href="icon.png?v=1">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -43,7 +43,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* FORCED WIDESCREEN LOGIC */
         @media (orientation: portrait) {
             #clock-container {
                 transform: rotate(90deg);
@@ -315,7 +314,6 @@
             container.style.transform = `rotate(${baseRotation}deg) translate(${randomX}px, ${randomY}px)`;
         }
 
-        // Location set to Fanwood, NJ
         const FALLBACK_LAT = 40.6387; 
         const FALLBACK_LON = -74.3915;
 
