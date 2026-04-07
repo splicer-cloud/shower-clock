@@ -30,6 +30,7 @@
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             touch-action: none;
+            transition: background-image 1s ease;
         }
 
         @keyframes gradientBG {
@@ -38,23 +39,27 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* FORCED WIDESCREEN LOGIC 
-           When held portrait (vertical), we rotate 90deg.
-           We make the container width (which is physically the height) 
-           long enough to cover the whole phone.
-        */
+        /* FORCED WIDESCREEN LOGIC */
         @media (orientation: portrait) {
             #clock-container {
                 transform: rotate(90deg);
-                width: 88vh !important; /* Physically 88% of screen length */
-                height: 80vw !important; /* Physically 80% of screen width */
+                width: 92vh !important; /* Slightly wider to give breathing room */
+                height: 85vw !important; /* Taller glass element */
+                padding: 6vw 5vh !important;
+                border-radius: 8vh !important;
             }
-            #time { font-size: 18vh !important; }
+            #time { font-size: 16vh !important; }
             #time span { width: 1.1ch !important; }
             #time .colon { width: 0.6ch !important; }
-            #seconds, #ampm { font-size: 5.5vh !important; }
-            #stopwatch { font-size: 8vh !important; }
+            #seconds, #ampm { font-size: 5vh !important; }
+            #info-row { margin-top: 15px !important; padding-top: 15px !important; }
+            .info-label { font-size: 2.5vh !important; }
+            #stopwatch { font-size: 6.5vh !important; }
             #stopwatch span { width: 1.1ch !important; }
+            
+            /* Portrait weather proportions */
+            .weather-icon { width: 18vh !important; height: 18vh !important; }
+            #weather-temp { font-size: 4vh !important; }
         }
 
         #clock-container {
@@ -63,13 +68,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px;
-            width: 90vw;
+            padding: 5vh 5vw;
+            width: 92vw;
             box-sizing: border-box;
             background: var(--cloud-bg);
             backdrop-filter: blur(var(--cloud-blur));
             -webkit-backdrop-filter: blur(var(--cloud-blur));
-            border-radius: 80px;
+            border-radius: 6vw;
             border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -84,7 +89,6 @@
             color: #ffffff;
         }
 
-        /* Number boxes to prevent jumping */
         #time span, #seconds span, #stopwatch span {
             display: inline-block;
             text-align: center;
@@ -94,19 +98,18 @@
         }
 
         #time {
-            font-size: 18vw; 
+            font-size: 16vw; 
             line-height: 1;
             font-weight: 700;
             text-shadow: 0 8px 15px rgba(0,0,0,0.2);
             display: flex;
         }
 
-        /* The Big Spread */
         #time span { width: 1.1ch; } 
         #time .colon { width: 0.5ch; }
 
         #seconds {
-            font-size: 5vw;
+            font-size: 4.5vw;
             margin-left: 20px;
             font-weight: 400;
             opacity: 0.9;
@@ -115,34 +118,68 @@
         #seconds span { width: 1.2ch; }
 
         #ampm {
-            font-size: 5vw;
+            font-size: 4.5vw;
             margin-left: 10px;
             font-weight: 400;
             width: 3ch;
             text-align: left;
         }
 
-        #stopwatch-wrapper {
-            width: 90%;
-            margin-top: 30px;
-            padding-top: 20px;
+        /* BOTTOM ROW LAYOUT */
+        #info-row {
+            width: 100%;
+            margin-top: 3vw;
+            padding-top: 3vw;
             border-top: 2px solid rgba(255, 255, 255, 0.15);
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            justify-content: space-around;
             align-items: center;
         }
 
-        #stopwatch-label {
-            font-size: 3vh;
-            text-transform: uppercase;
-            letter-spacing: 6px;
-            font-weight: 700;
-            color: var(--session-yellow);
-            margin-bottom: 10px;
+        #weather-wrapper, #stopwatch-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
         }
 
+        .info-label {
+            font-size: 2.5vw;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 700;
+            color: var(--session-yellow);
+            margin-bottom: 5px;
+        }
+
+        /* WEATHER WIDGET */
+        #weather-icon-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .weather-icon {
+            width: 16vw;
+            height: 16vw;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+        }
+
+        #weather-temp {
+            position: absolute;
+            font-size: 3.5vw;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* STOPWATCH */
         #stopwatch {
-            font-size: 8vw;
+            font-size: 6.5vw;
             font-weight: 700;
             color: #ffffff;
             display: flex;
@@ -163,13 +200,13 @@
             cursor: pointer;
             color: rgba(255, 255, 255, 0.5);
             padding: 10px;
-            margin-left: 15px;
+            margin-left: 10px;
             display: flex;
             align-items: center;
             transition: color 0.2s;
         }
         #reset-btn:active { color: var(--session-yellow); transform: scale(0.9); }
-        #reset-btn svg { width: 5vw; height: 5vw; fill: currentColor; }
+        #reset-btn svg { width: 4vw; height: 4vw; fill: currentColor; }
 
         #myhyundai-btn {
             position: absolute;
@@ -194,13 +231,27 @@
             <div id="ampm"></div>
         </div>
 
-        <div id="stopwatch-wrapper">
-            <div id="stopwatch-label">Session</div>
-            <div id="stopwatch-row">
-                <div id="stopwatch"></div>
-                <button id="reset-btn" aria-label="Reset Timer">
-                    <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-                </button>
+        <div id="info-row">
+            <!-- Weather Section -->
+            <div id="weather-wrapper">
+                <div id="weather-icon-container">
+                    <span id="weather-temp">--&deg;</span>
+                    <!-- Initial placeholder icon -->
+                    <svg viewBox="0 0 100 100" class="weather-icon" id="dynamic-weather-svg">
+                        <path d="M 20 75 C 5 75 5 50 20 50 C 20 30 50 25 60 40 C 80 35 95 60 80 75 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Timer Section -->
+            <div id="stopwatch-wrapper">
+                <div class="info-label">Session</div>
+                <div id="stopwatch-row">
+                    <div id="stopwatch"></div>
+                    <button id="reset-btn" aria-label="Reset Timer">
+                        <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -210,6 +261,19 @@
     </div>
 
     <script>
+        // --- RANDOM BACKGROUND GENERATOR ---
+        function randomizeBackground() {
+            const getPastel = () => {
+                const h = Math.floor(Math.random() * 360);
+                const s = Math.floor(Math.random() * 26) + 75; 
+                const l = Math.floor(Math.random() * 11) + 65; 
+                return `hsl(${h}, ${s}%, ${l}%)`;
+            };
+            document.body.style.backgroundImage = `linear-gradient(-45deg, ${getPastel()}, ${getPastel()}, ${getPastel()}, ${getPastel()})`;
+        }
+        randomizeBackground();
+
+        // --- CLOCK & STOPWATCH LOGIC ---
         let sessionStartTime = Date.now();
         let is24Hour = false;
 
@@ -252,13 +316,78 @@
             const isPortrait = window.innerHeight > window.innerWidth;
             const baseRotation = isPortrait ? 90 : 0;
             
-            // Subtle jitter for burn-in protection
             const randomX = Math.floor(Math.random() * 10) - 5; 
             const randomY = Math.floor(Math.random() * 10) - 5;
-            
             container.style.transform = `rotate(${baseRotation}deg) translate(${randomX}px, ${randomY}px)`;
         }
 
+        // --- WEATHER LOGIC ---
+        const FALLBACK_LAT = 40.6387; // Fanwood, NJ
+        const FALLBACK_LON = -74.3915;
+
+        function updateWeatherUI(temp, code) {
+            document.getElementById('weather-temp').innerHTML = `${temp}&deg;`;
+            const svgEl = document.getElementById('dynamic-weather-svg');
+            
+            let iconHtml = '';
+            if (code === 0 || code === 1) { // Sun
+                iconHtml = `
+                    <circle cx="50" cy="50" r="32" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3"/>
+                    <line x1="50" y1="3" x2="50" y2="13" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                    <line x1="50" y1="87" x2="50" y2="97" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                    <line x1="3" y1="50" x2="13" y2="50" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                    <line x1="87" y1="50" x2="97" y2="50" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                    <line x1="17" y1="17" x2="24" y2="24" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                    <line x1="83" y1="83" x2="76" y2="76" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                    <line x1="17" y1="83" x2="24" y2="76" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                    <line x1="83" y1="17" x2="76" y2="24" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                `;
+            } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { // Rain
+                iconHtml = `
+                    <path d="M 20 65 C 5 65 5 40 20 40 C 20 20 50 15 60 30 C 80 25 95 50 80 65 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
+                    <line x1="30" y1="75" x2="25" y2="85" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="50" y1="75" x2="45" y2="85" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="70" y1="75" x2="65" y2="85" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                `;
+            } else if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) { // Snow
+                iconHtml = `
+                    <path d="M 20 65 C 5 65 5 40 20 40 C 20 20 50 15 60 30 C 80 25 95 50 80 65 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
+                    <circle cx="30" cy="80" r="3" fill="white"/>
+                    <circle cx="50" cy="80" r="3" fill="white"/>
+                    <circle cx="70" cy="80" r="3" fill="white"/>
+                `;
+            } else { // Cloud
+                iconHtml = `
+                    <path d="M 20 75 C 5 75 5 50 20 50 C 20 30 50 25 60 40 C 80 35 95 60 80 75 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
+                `;
+            }
+            svgEl.innerHTML = iconHtml;
+        }
+
+        function fetchWeatherData(lat, lon) {
+            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit`)
+                .then(res => res.json())
+                .then(data => {
+                    const temp = Math.round(data.current_weather.temperature);
+                    const code = data.current_weather.weathercode;
+                    updateWeatherUI(temp, code);
+                })
+                .catch(err => console.error("Weather error:", err));
+        }
+
+        function initWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => fetchWeatherData(pos.coords.latitude, pos.coords.longitude),
+                    (err) => fetchWeatherData(FALLBACK_LAT, FALLBACK_LON),
+                    { timeout: 5000 }
+                );
+            } else {
+                fetchWeatherData(FALLBACK_LAT, FALLBACK_LON);
+            }
+        }
+
+        // --- EVENT LISTENERS & INITS ---
         document.getElementById('clock-container').addEventListener('click', () => {
             is24Hour = !is24Hour;
             updateClock();
@@ -274,10 +403,15 @@
 
         setInterval(updateClock, 1000);
         setInterval(protectScreen, 60000); 
+        setInterval(initWeather, 30 * 60 * 1000); 
+
         updateClock();
         protectScreen();
+        initWeather();
 
         window.addEventListener('resize', protectScreen);
     </script>
 </body>
 </html>
+
+
