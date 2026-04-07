@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Bubble Cloud Clock</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    
+    <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
@@ -45,8 +47,8 @@
         @media (orientation: portrait) {
             #clock-container {
                 transform: rotate(90deg);
-                width: 92vh !important; /* Slightly wider to give breathing room */
-                height: 85vw !important; /* Taller glass element */
+                width: 92vh !important; 
+                height: 85vw !important; 
                 padding: 6vw 5vh !important;
                 border-radius: 8vh !important;
             }
@@ -58,8 +60,6 @@
             .info-label { font-size: 2.5vh !important; }
             #stopwatch { font-size: 6.5vh !important; }
             #stopwatch span { width: 1.1ch !important; }
-            
-            /* Portrait weather proportions */
             .weather-icon { width: 18vh !important; height: 18vh !important; }
             #weather-temp { font-size: 4vh !important; }
         }
@@ -127,7 +127,6 @@
             text-align: left;
         }
 
-        /* BOTTOM ROW LAYOUT */
         #info-row {
             width: 100%;
             margin-top: 3vw;
@@ -155,7 +154,6 @@
             margin-bottom: 5px;
         }
 
-        /* WEATHER WIDGET */
         #weather-icon-container {
             position: relative;
             display: flex;
@@ -179,7 +177,6 @@
             z-index: 2;
         }
 
-        /* STOPWATCH */
         #stopwatch {
             font-size: 6.5vw;
             font-weight: 700;
@@ -234,18 +231,15 @@
         </div>
 
         <div id="info-row">
-            <!-- Weather Section -->
             <div id="weather-wrapper">
                 <div id="weather-icon-container">
                     <span id="weather-temp">--&deg;</span>
-                    <!-- Initial placeholder icon -->
                     <svg viewBox="0 0 100 100" class="weather-icon" id="dynamic-weather-svg">
                         <path d="M 20 75 C 5 75 5 50 20 50 C 20 30 50 25 60 40 C 80 35 95 60 80 75 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
                     </svg>
                 </div>
             </div>
 
-            <!-- Timer Section -->
             <div id="stopwatch-wrapper">
                 <div class="info-label">Session</div>
                 <div id="stopwatch-row">
@@ -263,7 +257,6 @@
     </div>
 
     <script>
-        // --- RANDOM BACKGROUND GENERATOR ---
         function randomizeBackground() {
             const getPastel = () => {
                 const h = Math.floor(Math.random() * 360);
@@ -275,7 +268,6 @@
         }
         randomizeBackground();
 
-        // --- CLOCK & STOPWATCH LOGIC ---
         let sessionStartTime = Date.now();
         let is24Hour = false;
 
@@ -323,8 +315,8 @@
             container.style.transform = `rotate(${baseRotation}deg) translate(${randomX}px, ${randomY}px)`;
         }
 
-        // --- WEATHER LOGIC ---
-        const FALLBACK_LAT = 40.6387; // Fanwood, NJ
+        // Location set to Fanwood, NJ
+        const FALLBACK_LAT = 40.6387; 
         const FALLBACK_LON = -74.3915;
 
         function updateWeatherUI(temp, code) {
@@ -332,7 +324,7 @@
             const svgEl = document.getElementById('dynamic-weather-svg');
             
             let iconHtml = '';
-            if (code === 0 || code === 1) { // Sun
+            if (code === 0 || code === 1) { 
                 iconHtml = `
                     <circle cx="50" cy="50" r="32" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3"/>
                     <line x1="50" y1="3" x2="50" y2="13" stroke="white" stroke-width="4" stroke-linecap="round"/>
@@ -344,21 +336,21 @@
                     <line x1="17" y1="83" x2="24" y2="76" stroke="white" stroke-width="4" stroke-linecap="round"/>
                     <line x1="83" y1="17" x2="76" y2="24" stroke="white" stroke-width="4" stroke-linecap="round"/>
                 `;
-            } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { // Rain
+            } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { 
                 iconHtml = `
                     <path d="M 20 65 C 5 65 5 40 20 40 C 20 20 50 15 60 30 C 80 25 95 50 80 65 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
                     <line x1="30" y1="75" x2="25" y2="85" stroke="white" stroke-width="3" stroke-linecap="round"/>
                     <line x1="50" y1="75" x2="45" y2="85" stroke="white" stroke-width="3" stroke-linecap="round"/>
                     <line x1="70" y1="75" x2="65" y2="85" stroke="white" stroke-width="3" stroke-linecap="round"/>
                 `;
-            } else if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) { // Snow
+            } else if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) { 
                 iconHtml = `
                     <path d="M 20 65 C 5 65 5 40 20 40 C 20 20 50 15 60 30 C 80 25 95 50 80 65 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
                     <circle cx="30" cy="80" r="3" fill="white"/>
                     <circle cx="50" cy="80" r="3" fill="white"/>
                     <circle cx="70" cy="80" r="3" fill="white"/>
                 `;
-            } else { // Cloud
+            } else { 
                 iconHtml = `
                     <path d="M 20 75 C 5 75 5 50 20 50 C 20 30 50 25 60 40 C 80 35 95 60 80 75 Z" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3" stroke-linejoin="round"/>
                 `;
@@ -389,7 +381,6 @@
             }
         }
 
-        // --- EVENT LISTENERS & INITS ---
         document.getElementById('clock-container').addEventListener('click', () => {
             is24Hour = !is24Hour;
             updateClock();
