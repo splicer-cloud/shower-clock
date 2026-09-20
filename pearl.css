@@ -1,0 +1,123 @@
+/* Pearl and pool-light study. All texture is local and resolution independent. */
+html { background: #286b8a; animation: none; }
+body {
+  position: relative;
+  isolation: isolate;
+  background-color: #286b8a;
+  background-image: linear-gradient(125deg, #087e96, #576db1, #a568a0, #dd927f, #2bada5);
+  background-size: 350% 350%;
+  animation: gradientBG 38s ease-in-out infinite;
+}
+body::before, body::after {
+  content: '';
+  position: absolute;
+  inset: -25%;
+  pointer-events: none;
+  z-index: -1;
+}
+body::before {
+  background:
+    repeating-radial-gradient(ellipse at 25% 35%, transparent 0 47px, rgba(196,255,246,.14) 51px, transparent 58px 112px),
+    repeating-radial-gradient(ellipse at 75% 65%, transparent 0 69px, rgba(240,226,255,.15) 74px, transparent 82px 154px),
+    radial-gradient(ellipse at 30% 20%, rgba(121,255,225,.42), transparent 48%),
+    radial-gradient(ellipse at 75% 80%, rgba(255,194,183,.35), transparent 46%);
+  filter: blur(7px);
+  transform: rotate(-12deg);
+  animation: poolDrift 32s ease-in-out infinite alternate;
+}
+body::after {
+  inset: 0;
+  background-image: url('grain.svg');
+  opacity: .24;
+  mix-blend-mode: soft-light;
+}
+@keyframes poolDrift {
+  from { transform: translate(-2%, -2%) rotate(-12deg) scale(1); }
+  to { transform: translate(3%, 3%) rotate(-4deg) scale(1.12); }
+}
+#clock-container {
+  background:
+    url('grain.svg'),
+    radial-gradient(ellipse at 12% 0%, rgba(223,255,251,.26), transparent 55%),
+    linear-gradient(135deg, rgba(220,250,255,.22), rgba(49,71,108,.22) 65%, rgba(244,181,211,.17));
+  background-size: 180px 180px, auto, auto;
+  background-blend-mode: soft-light, normal, normal;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(237,255,255,.48);
+  box-shadow: inset 0 2px 2px rgba(255,255,255,.45), inset 0 -2px 3px rgba(40,54,99,.2), 0 24px 65px rgba(16,38,69,.3);
+}
+#time { text-shadow: none; filter: drop-shadow(0 2px 0 rgba(255,255,255,.45)) drop-shadow(0 5px 0 rgba(64,74,117,.55)) drop-shadow(0 12px 9px rgba(25,35,69,.35)); }
+#time span, #stopwatch span {
+  color: #f4fafb;
+  background-image: url('grain.svg'), linear-gradient(155deg, #fffef3 4%, #e9fff9 24%, #fbf8ff 38%, #bfcede 55%, #f4dced 68%, #fff8e8 82%, #c8f5ec 100%);
+  background-size: 120px 120px, 100% 100%;
+  background-blend-mode: soft-light, normal;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: .6px rgba(255,255,255,.45);
+}
+#seconds, #ampm { color: #effffa; text-shadow: 0 3px 6px rgba(24,48,76,.4); opacity: 1; }
+#stopwatch { filter: drop-shadow(0 3px 0 rgba(53,65,101,.45)) drop-shadow(0 5px 5px rgba(25,35,69,.25)); }
+.info-label { color: #fff0b2; text-shadow: 0 2px 6px rgba(46,48,81,.3); }
+#info-row { border-top-color: rgba(232,255,255,.28); }
+.weather-icon { filter: drop-shadow(0 4px 6px rgba(20,41,71,.3)); }
+#reset-btn { color: rgba(242,255,252,.72); }
+#myhyundai-btn { color: rgba(242,255,252,.38); }
+#clock-container:active { transform: scale(.98) !important; }
+@media (orientation: portrait) {
+  #clock-container:active { transform: rotate(90deg) scale(.98) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body, body::before { animation: none; }
+  #clock-container { transition: none; }
+}
+
+/* Cross-fade whole palettes; retain the slow movement within each palette. */
+body { background-image: none; animation: none; }
+.palette-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  opacity: 0;
+  background-size: 350% 350%;
+  animation: gradientBG 38s ease-in-out infinite;
+  transition: opacity 12s ease-in-out;
+}
+.weather-icon { width: 20vw; height: 17.5vw; overflow: visible; }
+#weather-temp {
+  position: static;
+  font-size: 27px !important;
+  font-weight: 600;
+  fill: #4b506d;
+  color: #4b506d;
+  text-shadow: 0 1px 0 rgba(255,255,255,.6);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+@media (orientation: portrait) {
+  .weather-icon { width: 21vh !important; height: 18.375vh !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .palette-layer { animation: none; transition: none; }
+}
+
+/* Center the heading on the digits, independently of the reset control. */
+#stopwatch-wrapper {
+  display: grid;
+  grid-template-columns: max-content auto;
+  grid-template-rows: auto auto;
+  justify-content: center;
+  align-items: center;
+}
+#stopwatch-wrapper .info-label { grid-column: 1; grid-row: 1; text-align: center; }
+#stopwatch-row { display: contents; }
+#stopwatch { grid-column: 1; grid-row: 2; }
+#reset-btn { grid-column: 2; grid-row: 2; }
+#myhyundai-btn {
+  color: #91e6f5;
+  filter: drop-shadow(0 1px 1px rgba(235,250,255,.7)) drop-shadow(0 2px 4px rgba(12,61,135,.3));
+}
+#myhyundai-btn svg { width: 4.5vw; height: 4.5vw; }
