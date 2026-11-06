@@ -1,1 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900"><defs><radialGradient id="light"><stop stop-color="#d7fff1" stop-opacity=".35"/><stop offset="1" stop-color="#d7fff1" stop-opacity="0"/></radialGradient><pattern id="caustics" width="310" height="230" patternUnits="userSpaceOnUse" patternTransform="rotate(-18) scale(1.35)"><g fill="none" stroke="#cffff0" stroke-linecap="round"><path d="M-30 40C25 8 65 25 89 66S151 113 182 67 261 15 330 44M-20 171C28 133 56 145 89 185S160 217 187 171 274 131 332 167M89 66C67 108 65 145 89 185M182 67C216 104 219 134 187 171M0 40C30 85 34 124 0 160M310 40C280 85 278 126 310 165" stroke-width="7" opacity=".055"/><path d="M-30 40C25 8 65 25 89 66S151 113 182 67 261 15 330 44M-20 171C28 133 56 145 89 185S160 217 187 171 274 131 332 167M89 66C67 108 65 145 89 185M182 67C216 104 219 134 187 171M0 40C30 85 34 124 0 160M310 40C280 85 278 126 310 165" stroke-width="1.8" opacity=".23"/></g></pattern></defs><ellipse cx="260" cy="100" rx="690" ry="480" fill="url(#light)"/><g fill="none" stroke="#d7fff1" stroke-opacity=".19" stroke-width="2" transform="translate(1060 660) rotate(-24)"><ellipse rx="190" ry="82"/><ellipse rx="260" ry="115"/><ellipse rx="345" ry="154"/><ellipse rx="445" ry="200"/><ellipse rx="560" ry="252"/><ellipse rx="690" ry="311"/><ellipse rx="830" ry="375"/><ellipse rx="985" ry="445"/><ellipse rx="1150" ry="520"/></g><g fill="none" stroke="#effff4" stroke-opacity=".12" stroke-width="4" transform="translate(1060 666) rotate(-24)"><ellipse rx="260" ry="115"/><ellipse rx="445" ry="200"/><ellipse rx="690" ry="311"/><ellipse rx="985" ry="445"/></g><rect width="1400" height="900" fill="url(#caustics)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+ <defs>
+  <radialGradient id="light"><stop stop-color="#ddfff2" stop-opacity=".32"/><stop offset="1" stop-color="#ddfff2" stop-opacity="0"/></radialGradient>
+  <filter id="soft" x="-25%" y="-35%" width="150%" height="170%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="13"/></filter>
+ </defs>
+ <ellipse cx="220" cy="60" rx="760" ry="600" fill="url(#light)"/>
+ <!-- Broad defocused water-light ribbons: no tiled seams or fine linework. -->
+ <g fill="none" stroke="#d5fff0" stroke-linecap="round" filter="url(#soft)">
+  <path d="M-130 185C110 -5 235 30 390 200S700 370 880 175 1190 -30 1530 150" stroke-width="32" opacity=".22"/>
+  <path d="M-140 530C80 335 235 380 405 555S710 720 910 520 1230 375 1540 520" stroke-width="26" opacity=".18"/>
+  <path d="M-120 880C120 700 280 725 440 900S770 1050 950 850 1280 710 1520 870" stroke-width="35" opacity=".14"/>
+  <path d="M390 200C295 325 305 415 405 555M880 175C1000 290 1015 395 910 520M405 555C325 680 335 795 440 900M910 520C1055 645 1060 755 950 850" stroke-width="24" opacity=".12"/>
+ </g>
+ <ellipse cx="1190" cy="670" rx="680" ry="510" fill="url(#light)" opacity=".35"/>
+</svg>

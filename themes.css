@@ -1,7 +1,7 @@
 /* Both finishes are deliberately still: no perpetual rendering or backdrop blur. */
 html { background: #052c35; }
 body { background: #073b46; background-image: radial-gradient(ellipse at 15% 0%, #89bcb3 0, transparent 58%), linear-gradient(135deg,#387c82,#0d4b5b 60%,#062b3b); animation:none; }
-body::before { inset:0; background: url('water-ripples.svg') center/cover; filter:none; transform:none; animation:none; opacity:.68; }
+body::before { inset:0; background: url('water-ripples.svg?v=3') center/cover; filter:none; transform:none; animation:none; opacity:.68; }
 body::after { display:none; }
 #clock-container { background:linear-gradient(145deg,rgba(185,230,217,.22),rgba(6,46,59,.75)); backdrop-filter:none; -webkit-backdrop-filter:none; border:1px solid rgba(207,247,232,.4); border-radius:4vw; box-shadow:inset 0 1px 0 #c6e9dd66,0 20px 55px #001e3044; transition:none; padding:7vh 5vw 5vh; }
 #time {filter:none; text-shadow:0 2px 3px #062a4055; font-weight:500; }
