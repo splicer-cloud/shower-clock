@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Bubble Cloud Clock</title>
+    <title>Shower Clock</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
     
     <link rel="apple-touch-icon" href="icon.png?v=pearl-2">
@@ -220,7 +220,8 @@
         }
     </style>
     <link rel="stylesheet" href="pearl.css">
-<link rel="stylesheet" href="weather-motion.css?v=1"></head>
+<link rel="stylesheet" href="weather-motion.css?v=1">
+<link rel="stylesheet" href="themes.css?v=1"></head>
 <body>
 
     <div id="clock-container">
@@ -257,7 +258,9 @@
     </div>
 
     <script src="weather-art.js?v=2"></script>
-    <script src="palettes.js"></script>
+    <button id="theme-toggle" type="button" aria-label="Switch clock theme">Swipe right · Walnut →</button>
+    <span id="theme-status" role="status" aria-live="polite"></span>
+    <script src="themes.js?v=1"></script>
     <script>
         let sessionStartTime = Date.now();
         let is24Hour = false;
@@ -267,6 +270,15 @@
                 const className = char === ':' ? 'class="colon"' : '';
                 return `<span ${className}>${char}</span>`;
             }).join('');
+        }
+
+        const lastText = {};
+        function updateDigits(id, value) {
+            if (lastText[id] === value) return;
+            lastText[id] = value;
+            const node = document.getElementById(id);
+            if (node.children.length !== value.length) node.innerHTML = createSpannedText(value);
+            else Array.from(node.children).forEach((span, i) => { if (span.textContent !== value[i]) span.textContent = value[i]; });
         }
 
         function updateClock() {
@@ -285,15 +297,15 @@
                 document.getElementById('ampm').style.display = 'none';
             }
             
-            document.getElementById('time').innerHTML = createSpannedText(`${h}:${m}`);
-            document.getElementById('seconds').innerHTML = createSpannedText(s);
+            updateDigits('time', `${h}:${m}`);
+            updateDigits('seconds', s);
             document.getElementById('ampm').textContent = ampmText;
 
             const elapsedMs = Date.now() - sessionStartTime;
             const totalSeconds = Math.floor(elapsedMs / 1000);
             const stopM = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
             const stopS = String(totalSeconds % 60).padStart(2, '0');
-            document.getElementById('stopwatch').innerHTML = createSpannedText(`${stopM}:${stopS}`);
+            updateDigits('stopwatch', `${stopM}:${stopS}`);
         }
 
         function protectScreen() {
@@ -345,8 +357,9 @@
 
         document.getElementById('myhyundai-btn').addEventListener('click', (e) => e.stopPropagation());
 
-        setInterval(updateClock, 1000);
-        setInterval(protectScreen, 60000); 
+        setInterval(() => { if (!document.hidden) updateClock(); }, 1000);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) updateClock(); });
+        setInterval(() => { if (!document.hidden) protectScreen(); }, 60000); 
         setInterval(initWeather, 30 * 60 * 1000); 
 
         updateClock();
