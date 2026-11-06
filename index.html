@@ -221,11 +221,11 @@
     </style>
     <link rel="stylesheet" href="pearl.css">
 <link rel="stylesheet" href="weather-motion.css?v=1">
-<link rel="stylesheet" href="themes.css?v=1"></head>
+<link rel="stylesheet" href="themes.css?v=2"></head>
 <body>
 
     <div id="clock-container">
-        <div id="time-wrapper">
+        <div id="time-wrapper" tabindex="0">
             <div id="time"></div>
             <div id="seconds"></div>
             <div id="ampm"></div>
@@ -258,9 +258,8 @@
     </div>
 
     <script src="weather-art.js?v=2"></script>
-    <button id="theme-toggle" type="button" aria-label="Switch clock theme">Swipe right · Walnut →</button>
     <span id="theme-status" role="status" aria-live="polite"></span>
-    <script src="themes.js?v=1"></script>
+    <script src="themes.js?v=2"></script>
     <script>
         let sessionStartTime = Date.now();
         let is24Hour = false;

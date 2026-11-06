@@ -4,7 +4,6 @@ body { background: #073b46; background-image: radial-gradient(ellipse at 15% 0%,
 body::before { inset:0; background: url('water-ripples.svg') center/cover; filter:none; transform:none; animation:none; opacity:.68; }
 body::after { display:none; }
 #clock-container { background:linear-gradient(145deg,rgba(185,230,217,.22),rgba(6,46,59,.75)); backdrop-filter:none; -webkit-backdrop-filter:none; border:1px solid rgba(207,247,232,.4); border-radius:4vw; box-shadow:inset 0 1px 0 #c6e9dd66,0 20px 55px #001e3044; transition:none; padding:7vh 5vw 5vh; }
-#clock-container::before { content:'R I P P L E'; position:absolute; top:2.4vh; left:0; right:0; text-align:center; font:600 10px/1 system-ui,sans-serif; letter-spacing:.35em; color:#d1e9da; }
 #time {filter:none; text-shadow:0 2px 3px #062a4055; font-weight:500; }
 #time span,#stopwatch span { color:#f4f8e9; background:none; -webkit-text-fill-color:currentColor; -webkit-text-stroke:0; }
 #seconds,#ampm { color:#d4eadf; text-shadow:none; }
@@ -12,8 +11,6 @@ body::after { display:none; }
 .info-label { color:#c1dccc; font-size:1.8vw; letter-spacing:.22em; text-shadow:none; }
 #info-row { border-color:#d0e9dc40; margin-top:2vw; padding-top:2vw; }
 .weather-icon { filter:none; }
-#theme-toggle { position:fixed; bottom:max(12px,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); z-index:5; border:1px solid #d4eadf55; border-radius:30px; padding:10px 18px; background:#052f3cdc; color:#e2eee3; font:500 11px/1.2 system-ui,sans-serif; letter-spacing:.07em; cursor:pointer; }
-#theme-toggle:focus-visible,#reset-btn:focus-visible,#myhyundai-btn:focus-visible { outline:2px solid #fff2b9; outline-offset:4px; }
 #theme-status { position:absolute; width:1px; height:1px; clip-path:inset(50%); overflow:hidden; }
 #myhyundai-btn {color:#c3e5dc;filter:none;bottom:18px;right:20px;}
 #reset-btn {color:#c3e5dc;}
@@ -22,19 +19,41 @@ body::after { display:none; }
 body[data-theme='wood'] {background:#21120c;background-image:radial-gradient(ellipse at 50% 15%,#70472d55,transparent 70%),linear-gradient(135deg,#382419,#130b08);}
 body[data-theme='wood']::before {background:none;}
 body[data-theme='wood'] #clock-container {background:linear-gradient(105deg,#deb48518,#180b0740),url('walnut.svg') center/cover; border:1px solid #b58d5c; box-shadow:inset 0 0 0 5px #321b0f,inset 0 0 0 6px #bc8b4d88,inset 0 0 0 10px #341b0f88,0 24px 65px #0009; border-radius:2.3vw;}
-body[data-theme='wood'] #clock-container::before {content:'A T E L I E R   ·   N O .  0 2';color:#e6c494;font-weight:400;letter-spacing:.27em;}
 body[data-theme='wood'] #time,body[data-theme='wood'] #stopwatch {font-family:Georgia,'Times New Roman',serif; font-weight:400; letter-spacing:-.035em; filter:none;}
 body[data-theme='wood'] #time span,body[data-theme='wood'] #stopwatch span {color:#26150d;text-shadow:0 1px 0 #edc58caa,0 -1px 1px #100804;}
 body[data-theme='wood'] #seconds,body[data-theme='wood'] #ampm {font-family:Georgia,'Times New Roman',serif;color:#f0d1a3;text-shadow:0 1px 1px #120805;}
 body[data-theme='wood'] .info-label {color:#f0d1a3;font-family:Georgia,'Times New Roman',serif;letter-spacing:.2em;}
 body[data-theme='wood'] #info-row {border-top:1px solid #301a10;box-shadow:0 -1px 0 #efc88b55;}
 body[data-theme='wood'] #reset-btn,body[data-theme='wood'] #myhyundai-btn {color:#e5c193;filter:none;}
-body[data-theme='wood'] #theme-toggle {background:#2e1c12;border-color:#b68a51;color:#eed0a5;}
 /* Weather is carved in the same timber, with warm brass details. */
 body[data-theme='wood'] #dynamic-weather-svg [filter] {filter:none;}
 body[data-theme='wood'] #dynamic-weather-svg path,body[data-theme='wood'] #dynamic-weather-svg circle {fill:#634029;stroke:#e1b77d;stroke-width:1;}
 body[data-theme='wood'] #dynamic-weather-svg path[fill='none'] {fill:none;}
 body[data-theme='wood'] #dynamic-weather-svg .weather-stars,body[data-theme='wood'] #dynamic-weather-svg .weather-lightning {fill:#dfb775;}
 body[data-theme='wood'] #weather-temp {fill:#fff0ce;letter-spacing:0;font-family:Georgia,'Times New Roman',serif;}
-@media(orientation:portrait){#clock-container {padding:7vw 5vh 5vw!important;border-radius:4vh;}#clock-container::before{top:2.5vw}.info-label{font-size:2.2vh!important;}body[data-theme='wood'] #clock-container{border-radius:2.3vh;}}
-@media(max-height:380px) and (orientation:landscape){#clock-container{padding-top:6vh;padding-bottom:3vh;}#clock-container::before{top:2vh;font-size:8px;}#theme-toggle{bottom:5px;padding:7px 12px;}#info-row{margin-top:1vw;padding-top:1vw;}}
+
+/* Spend the recovered header/footer space on the clock, not instructions. */
+html,body { background-size:100% 100%;transition:none; }
+#clock-container::before {content:none;display:none;}
+#clock-container {width:96vw; height:92vh; height:92dvh; padding:3vh 3vw;}
+#time-wrapper {touch-action:none;}
+#time-wrapper:focus-visible,#reset-btn:focus-visible,#myhyundai-btn:focus-visible {outline:2px solid #fff2b9;outline-offset:4px;}
+#time {font-size:min(18vw,34vh);}
+#seconds,#ampm {font-size:min(4.5vw,9vh);}
+#seconds {margin-left:1.5vw;}
+#ampm {margin-left:1vw;}
+#info-row {margin-top:1vh;padding-top:1vh;}
+.weather-icon {width:min(20vw,33vh);height:min(17.5vw,29vh);}
+.info-label {font-size:min(1.8vw,4vh);}
+#stopwatch {font-size:min(7vw,15vh);}
+@media(orientation:portrait){
+ #clock-container {width:94vh!important;width:94dvh!important;height:92vw!important;padding:3vw 3vh!important;border-radius:4vh!important;flex-shrink:0;}
+ #time {font-size:min(18vh,34vw)!important;}
+ #seconds,#ampm {font-size:min(4.5vh,9vw)!important;}
+ #seconds {margin-left:1.5vh;} #ampm {margin-left:1vh;}
+ #info-row {margin-top:1vw!important;padding-top:1vw!important;}
+ .weather-icon {width:min(20vh,33vw)!important;height:min(17.5vh,29vw)!important;}
+ .info-label {font-size:min(1.8vh,4vw)!important;}
+ #stopwatch {font-size:min(7vh,15vw)!important;}
+ body[data-theme='wood'] #clock-container {border-radius:2.3vh!important;}
+}
