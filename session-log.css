@@ -1,0 +1,9 @@
+#session-log-btn { position: fixed; left: max(12px, env(safe-area-inset-left)); bottom: max(12px, env(safe-area-inset-bottom)); z-index: 10; border: 1px solid #ffffff66; color: white; background: #102f3dcc; border-radius: 1em; padding: .45em .8em; font: inherit; font-size: 14px; }
+#session-dialog { color: #162f36; background: #f5fafb; border: 0; border-radius: 18px; padding: 22px; box-sizing: border-box; width: min(92vw, 520px); max-height: 85dvh; overflow: auto; touch-action: pan-y; font: 16px/1.5 system-ui, sans-serif; }
+#session-dialog::backdrop { background: #0008; }
+#session-dialog h2 { margin-top: 0; }
+#session-dialog label, #session-dialog input { display: block; width: 100%; box-sizing: border-box; }
+#session-dialog input { font: inherit; padding: 8px; margin: 4px 0 12px; }
+#session-dialog button { font: inherit; padding: 8px 12px; border-radius: 9px; border: 1px solid #748a90; color: #162f36; background: white; margin: 5px 3px 5px 0; }
+#session-dialog details { margin-top: 16px; }
+#log-status { font-weight: 600; }

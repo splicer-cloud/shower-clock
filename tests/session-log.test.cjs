@@ -1,0 +1,9 @@
+const {test}=require('node:test'); const assert=require('node:assert/strict');
+const {SessionLog,Sync,validEndpoint}=require('../session-log.js');
+const storage=()=>{let x={};return {getItem:k=>x[k]||null,setItem:(k,v)=>x[k]=v}};
+function fixture(){let t=1000,i=0;const s=storage(),l=new SessionLog(s,()=>t,()=>`id-${++i}`);return {l,s,time:n=>t=n};}
+test('duplicate begin/end safe, return fresh, exact duration',()=>{const {l,time}=fixture();l.start();l.start();time(61000);l.finish();l.finish();assert.equal(l.state.sessions.length,1);assert.equal(l.state.sessions[0].durationMs,60000);assert.equal(l.start().start,61000)});
+test('OS interruption explicitly estimated from checkpoint',()=>{const {l,s,time}=fixture();l.start();time(12000);l.heartbeat();const r=new SessionLog(s);r.recover();assert.equal(r.state.sessions[0].end,12000);assert.equal(r.state.sessions[0].estimated,true)});
+test('offline remains queued; only matching acknowledgments accepted',async()=>{const {l,time}=fixture();l.start();time(2000);l.finish();const config=()=>({url:'https://script.google.com/macros/s/test/exec',token:'a'.repeat(64)});const sync=new Sync(l,config,async()=>{throw Error('offline')});await sync.flush();assert.equal(l.pending().length,1);sync.send=async()=>({ok:true,json:async()=>({ok:true,accepted:['other',l.pending()[0].id]})});await sync.flush();assert.equal(l.pending().length,0)});
+test('invalid endpoints and corrupt storage fail safely',()=>{assert.equal(validEndpoint('http://script.google.com/macros/s/a/exec'),false);assert.equal(validEndpoint('https://evil.com/macros/s/a/exec'),false);const l=new SessionLog({getItem:()=>'{',setItem:()=>{throw Error('should not overwrite')}});assert.ok(l.error);l.start();assert.ok(l.blocked)});
+test('clock rollback never negative; CSV contains exact timestamps',()=>{const {l,time}=fixture();l.start();time(0);l.finish();assert.equal(l.state.sessions[0].durationMs,0);assert.match(l.csv(),/1970-01-01T00:00:01.000Z/)});

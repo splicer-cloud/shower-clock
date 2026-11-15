@@ -221,8 +221,26 @@
     </style>
     <link rel="stylesheet" href="pearl.css">
 <link rel="stylesheet" href="weather-motion.css?v=1">
-<link rel="stylesheet" href="themes.css?v=3"></head>
+<link rel="stylesheet" href="themes.css?v=3">
+<link rel="stylesheet" href="session-log.css?v=1"></head>
 <body>
+    <button id="session-log-btn" aria-label="Shower session log">Log</button>
+    <dialog id="session-dialog" aria-labelledby="log-title">
+      <h2 id="log-title">Shower log</h2>
+      <p id="session-count"></p><p id="log-status" role="status"></p>
+      <p>Each time this screen becomes visible starts a session. Leaving it ends the session, including switching apps or locking the screen. This records screen time, not whether you are actually showering.</p>
+      <p>If iOS closes the app without a final event, the end is marked estimated from the last saved checkpoint. Clearing website data removes local records.</p>
+      <button id="log-export">Export CSV backup</button>
+      <details><summary>Google Sheets connection</summary>
+        <p>One-time setup is required. Only connect your own deployed receiver. No Google password belongs here.</p>
+        <form id="sync-settings">
+          <label>Google Apps Script URL<input id="sync-url" type="url" autocomplete="off" required></label>
+          <label>Connection key<input id="sync-token" type="password" autocomplete="off" required></label>
+          <button type="submit">Connect and sync</button>
+        </form><button id="sync-disconnect">Disconnect Sheets</button>
+      </details>
+      <button id="log-close">Close</button>
+    </dialog>
 
     <div id="clock-container">
         <div id="time-wrapper" tabindex="0">
@@ -263,6 +281,7 @@
     <script>
         let sessionStartTime = Date.now();
         let is24Hour = false;
+        window.resetSessionTimer = (startedAt) => { sessionStartTime = startedAt; updateClock(); };
 
         function createSpannedText(text) {
             return text.split('').map(char => {
@@ -368,5 +387,7 @@
 
         window.addEventListener('resize', protectScreen);
     </script>
+    <script src="session-log.js?v=1"></script>
+    <script src="session-ui.js?v=1"></script>
 </body>
 </html>
