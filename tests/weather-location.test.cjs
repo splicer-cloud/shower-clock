@@ -1,0 +1,6 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const {Place,KEY}=require('../weather-location');
+function store(){let v={};return {getItem:k=>v[k]||null,setItem:(k,x)=>v[k]=x,removeItem:k=>delete v[k]};}
+const home={lat:40.6387,lon:-74.3915};
+test('default home; explicit approximate place survives reopening; home reset',()=>{const s=store();let p=new Place(s,home);assert.deepEqual(p.place,home);p.use(40.651234,-74.387654);p=new Place(s,home);assert.deepEqual(p.place,{lat:40.65,lon:-74.39});assert.equal(p.saved,true);p.reset();assert.deepEqual(new Place(s,home).place,home)});
+test('bad storage safe; failed save leaves previous location',()=>{const p=new Place({getItem:()=>'{',setItem:()=>{throw Error('full')}},home);assert.deepEqual(p.place,home);assert.throws(()=>p.use(30,40));assert.deepEqual(p.place,home);assert.throws(()=>p.use(999,40))});
+test('startup and periodic refresh never invoke geolocation',()=>{const fs=require('node:fs');const s=fs.readFileSync(require.resolve('../index.html'),'utf8');const init=s.match(/function initWeather\(\) \{([\s\S]*?)\n        \}/)[1];assert.doesNotMatch(init,/geolocation|getCurrentPosition/);assert.equal((s.match(/getCurrentPosition/g)||[]).length,1);assert.match(s,/weather-locate'\).addEventListener\('click'/)});

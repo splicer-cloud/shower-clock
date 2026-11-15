@@ -239,6 +239,12 @@
           <button type="submit">Connect and sync</button>
         </form><button id="sync-disconnect">Disconnect Sheets</button>
       </details>
+      <details><summary>Weather location</summary>
+        <p id="weather-place-status" role="status"></p>
+        <p>Use a saved weather area without asking for location every time. “Use current location once” asks permission only when tapped, saves an approximate location on this device, and sends that area to Open-Meteo for weather. It does not follow you automatically. Clearing website data resets this choice.</p>
+        <button id="weather-locate">Use current location once</button>
+        <button id="weather-home">Use home area</button>
+      </details>
       <button id="log-close">Close</button>
     </dialog>
 
@@ -275,6 +281,7 @@
         </a>
     </div>
 
+    <script src="weather-location.js?v=1"></script>
     <script src="weather-art.js?v=2"></script>
     <span id="theme-status" role="status" aria-live="polite"></span>
     <script src="themes.js?v=2"></script>
@@ -350,17 +357,34 @@
                 .catch(err => console.error("Weather error:", err));
         }
 
-        function initWeather() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => fetchWeatherData(pos.coords.latitude, pos.coords.longitude),
-                    (err) => fetchWeatherData(FALLBACK_LAT, FALLBACK_LON),
-                    { timeout: 5000 }
-                );
-            } else {
-                fetchWeatherData(FALLBACK_LAT, FALLBACK_LON);
-            }
+        let weatherStorage;
+        try { weatherStorage = window.localStorage; } catch { weatherStorage = {getItem(){return null;},setItem(){throw Error('Storage unavailable');},removeItem(){throw Error('Storage unavailable');}}; }
+        const weatherPlace = new WeatherLocation.Place(weatherStorage, {lat:FALLBACK_LAT,lon:FALLBACK_LON});
+        const weatherStatus = document.getElementById('weather-place-status');
+        function describeWeatherPlace() {
+            weatherStatus.textContent = weatherPlace.saved ? 'Using your saved weather area. Update it here when you travel.' : 'Using the home area (Watchung). No location permission needed.';
         }
+        function initWeather() {
+            fetchWeatherData(weatherPlace.place.lat, weatherPlace.place.lon);
+        }
+        document.getElementById('weather-locate').addEventListener('click', () => {
+            if (!navigator.geolocation) { weatherStatus.textContent = 'Location is unavailable. Keeping your existing weather area.'; return; }
+            const button = document.getElementById('weather-locate'); button.disabled = true;
+            weatherStatus.textContent = 'Waiting for location permission…';
+            navigator.geolocation.getCurrentPosition(pos => {
+                button.disabled = false;
+                try { weatherPlace.use(pos.coords.latitude,pos.coords.longitude); describeWeatherPlace(); initWeather(); }
+                catch { weatherStatus.textContent = 'Could not save the location. Keeping your previous weather area.'; }
+            }, () => {
+                button.disabled = false;
+                weatherStatus.textContent = 'Location was not available or allowed. Keeping your existing weather area; no automatic retry.';
+            }, {timeout:10000,maximumAge:300000,enableHighAccuracy:false});
+        });
+        document.getElementById('weather-home').addEventListener('click', () => {
+            try { weatherPlace.reset(); describeWeatherPlace(); initWeather(); }
+            catch { weatherStatus.textContent = 'Could not save this choice. Your previous weather area is unchanged.'; }
+        });
+        describeWeatherPlace();
 
         document.getElementById('clock-container').addEventListener('click', () => {
             is24Hour = !is24Hour;
@@ -378,7 +402,7 @@
         setInterval(() => { if (!document.hidden) updateClock(); }, 1000);
         document.addEventListener('visibilitychange', () => { if (!document.hidden) updateClock(); });
         setInterval(() => { if (!document.hidden) protectScreen(); }, 60000); 
-        setInterval(initWeather, 30 * 60 * 1000); 
+        setInterval(() => { if (!document.hidden) initWeather(); }, 30 * 60 * 1000); 
 
         updateClock();
         protectScreen();
