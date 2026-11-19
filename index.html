@@ -234,10 +234,12 @@
       <details><summary>Google Sheets connection</summary>
         <p>One-time setup is required. Only connect your own deployed receiver. No Google password belongs here.</p>
         <form id="sync-settings">
-          <label>Google Apps Script URL<input id="sync-url" type="url" autocomplete="off" required></label>
-          <label>Connection key<input id="sync-token" type="password" autocomplete="off" required></label>
-          <button type="submit">Connect and sync</button>
-        </form><button id="sync-disconnect">Disconnect Sheets</button>
+          <label>Google Apps Script URL<input id="sync-url" type="url" autocapitalize="none" spellcheck="false" autocomplete="off" required></label>
+          <label>Connection key<input id="sync-token" type="password" autocapitalize="none" spellcheck="false" autocomplete="off"></label>
+          <button id="sync-submit" type="submit" disabled>Connect and sync</button>
+        </form>
+        <p id="connection-status" role="status" aria-live="polite"></p>
+        <button id="sync-disconnect" hidden>Disconnect Sheets</button>
       </details>
       <details><summary>Weather location</summary>
         <p id="weather-place-status" role="status"></p>
@@ -411,7 +413,7 @@
 
         window.addEventListener('resize', protectScreen);
     </script>
-    <script src="session-log.js?v=1"></script>
-    <script src="session-ui.js?v=1"></script>
+    <script src="session-log.js?v=2"></script>
+    <script src="session-ui.js?v=2"></script>
 </body>
 </html>

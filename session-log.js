@@ -73,21 +73,33 @@
   }
   class Sync {
     constructor(log, config, send = (...args) => fetch(...args)) { this.log = log; this.config = config; this.send = send; this.busy = false; this.message = ''; }
+    async sendBatch(connection, sessions, signal) {
+      const response = await this.send(connection.url, {
+        method: 'POST', redirect: 'follow', credentials: 'omit',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ token: connection.token, sessions }), keepalive: true, signal
+      });
+      if (!response.ok) throw new Error('Receiver unavailable');
+      const result = await response.json();
+      if (result.ok !== true || !Array.isArray(result.accepted)) {
+        throw new Error('Receiver declined the request');
+      }
+      return result;
+    }
     async flush() {
       const c = this.config();
       if (this.busy || !c || !validEndpoint(c.url) || !/^[a-f0-9]{64}$/.test(c.token)) return;
       const batch = this.log.pending().slice(0, 20); if (!batch.length) return;
       this.busy = true;
       try {
-        const response = await this.send(c.url, { method: 'POST', redirect: 'follow', credentials: 'omit',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ token: c.token, sessions: batch }), keepalive: true });
-        if (!response.ok) throw new Error('Receiver unavailable');
-        const result = await response.json();
-        if (result.ok !== true || !Array.isArray(result.accepted)) throw new Error('Receiver did not acknowledge');
+        const result = await this.sendBatch(c, batch);
+        const current = this.config();
+        if (!current || current.url !== c.url || current.token !== c.token) return;
         const sent = new Set(batch.map(s => s.id));
         this.log.acknowledge(result.accepted.filter(id => sent.has(id)));
-        this.message = this.log.pending().length ? 'More sessions waiting to sync' : 'Synced to Google Sheets';
+        if (!this.log.pending().length) this.message = 'Synced to Google Sheets';
+        else if (result.queued?.length) this.message = 'Google received the sessions. Waiting for the spreadsheet to confirm.';
+        else this.message = 'More sessions waiting to sync';
       } catch { this.message = 'Saved on this device. Sheets sync will retry when open.'; }
       finally { this.busy = false; }
     }
