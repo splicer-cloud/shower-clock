@@ -5,13 +5,36 @@
   let log = new ShowerSessions.SessionLog(storage);
   const status = document.getElementById('log-status');
   const dialog = document.getElementById('session-dialog');
+  const urlInput = document.getElementById('sync-url');
+  const keyInput = document.getElementById('sync-token');
+  const submit = document.getElementById('sync-submit');
+  const disconnect = document.getElementById('sync-disconnect');
+  const connectionStatus = document.getElementById('connection-status');
   let config = null;
-  try { config = JSON.parse(localStorage.getItem(CONFIG)); } catch {}
-  const sync = new ShowerSessions.Sync(log, () => config);
+  try {
+    const saved = JSON.parse(storage.getItem(CONFIG));
+    if (saved && ShowerSessions.validEndpoint(saved.url) && /^[a-f0-9]{64}$/.test(saved.token)) config = saved;
+  } catch {}
+  let sync = new ShowerSessions.Sync(log, () => config);
+  let connectionNotice = '', verified = false;
+  function displaySettings() {
+    urlInput.value = config?.url || '';
+    keyInput.value = '';
+    keyInput.placeholder = config ? 'Saved key on this device' : '';
+    submit.textContent = config ? 'Check connection and sync' : 'Connect and sync';
+    disconnect.hidden = !config;
+  }
   let releaseLock = null, requested = false;
   const showStatus = () => {
     status.textContent = log.error || (config ? (sync.message || `${log.pending().length} session(s) waiting to sync`) : 'Saved on this device. Google Sheets is not connected yet.');
     document.getElementById('session-count').textContent = `${log.state.sessions.length} completed session(s)`;
+    let message = connectionNotice;
+    if (!message && config) {
+      const saved = verified ? 'Connected to Google Sheets.' : 'Connection settings saved on this device.';
+      const next = sync.message || (log.pending().length ? 'Completed sessions are waiting to sync.' : 'No completed sessions waiting to sync.');
+      message = saved + ' ' + next;
+    }
+    if (connectionStatus.textContent !== message) connectionStatus.textContent = message;
   };
   const flush = async () => { await sync.flush(); showStatus(); };
   async function begin() {
@@ -45,19 +68,52 @@
     const a = document.createElement('a'); a.href = url; a.download = 'shower-clock-log.csv'; a.click();
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   });
-  document.getElementById('sync-settings').addEventListener('submit', e => {
+  document.getElementById('sync-settings').addEventListener('submit', async e => {
     e.preventDefault();
-    const url = document.getElementById('sync-url').value.trim();
-    const token = document.getElementById('sync-token').value.trim();
-    if (!ShowerSessions.validEndpoint(url) || !/^[a-f0-9]{64}$/.test(token)) {
-      status.textContent = 'Use the deployed Google Apps Script URL and its 64-character connection key.'; return;
+    if (submit.disabled) return;
+    const url = urlInput.value.trim();
+    const token = keyInput.value.trim() || (url === config?.url ? config.token : '');
+    if (!ShowerSessions.validEndpoint(url)) {
+      connectionNotice = 'Paste the Google Apps Script deployment URL ending in /exec.';
+      showStatus(); return;
     }
-    try { localStorage.setItem(CONFIG, JSON.stringify({ url, token })); config = { url, token }; }
-    catch { status.textContent = 'Unable to save connection settings on this device.'; return; }
-    document.getElementById('sync-token').value = ''; flush();
+    if (!/^[a-f0-9]{64}$/.test(token)) {
+      connectionNotice = 'Paste the 64-character value of CONNECTION_KEY for this URL.';
+      showStatus(); return;
+    }
+    const candidate = { url, token };
+    submit.disabled = disconnect.disabled = true;
+    urlInput.readOnly = keyInput.readOnly = true;
+    connectionNotice = 'Checking the connection with Google…';
+    showStatus();
+    try {
+      // An authenticated empty batch tests the key without creating a shower entry.
+      await sync.sendBatch(candidate, [], AbortSignal.timeout(20000));
+      try { storage.setItem(CONFIG, JSON.stringify(candidate)); }
+      catch { connectionNotice = 'Google accepted the key, but this browser could not save it.'; return; }
+      config = candidate;
+      verified = true;
+      sync = new ShowerSessions.Sync(log, () => config);
+      connectionNotice = '';
+      displaySettings();
+      flush();
+    } catch (error) {
+      connectionNotice = error.message === 'Receiver declined the request'
+        ? 'Google declined the connection. Check the deployment URL and connection key, then try again.'
+        : 'Could not confirm the connection. Check your internet connection and deployment URL, then try again.';
+    } finally {
+      submit.disabled = disconnect.disabled = false;
+      urlInput.readOnly = keyInput.readOnly = false;
+      showStatus();
+    }
   });
-  document.getElementById('sync-disconnect').addEventListener('click', () => {
-    localStorage.removeItem(CONFIG); config = null; sync.message = ''; showStatus();
+  disconnect.addEventListener('click', () => {
+    try { storage.removeItem(CONFIG); }
+    catch { connectionNotice = 'This browser could not remove the saved connection.'; showStatus(); return; }
+    config = null; sync = new ShowerSessions.Sync(log, () => config);
+    verified = false; connectionNotice = 'Disconnected from Google Sheets.';
+    displaySettings(); showStatus();
   });
+  displaySettings(); submit.disabled = false;
   begin(); showStatus();
 })();
