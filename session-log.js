@@ -72,7 +72,7 @@
     catch { return false; }
   }
   class Sync {
-    constructor(log, config, send = fetch) { this.log = log; this.config = config; this.send = send; this.busy = false; this.message = ''; }
+    constructor(log, config, send = (...args) => fetch(...args)) { this.log = log; this.config = config; this.send = send; this.busy = false; this.message = ''; }
     async flush() {
       const c = this.config();
       if (this.busy || !c || !validEndpoint(c.url) || !/^[a-f0-9]{64}$/.test(c.token)) return;
