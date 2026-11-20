@@ -6,6 +6,8 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
   const KEY = 'shower-clock.sessions.v1';
+  const MIN_SESSION_MS = 60 * 1000;
+  const qualifies = session => Number.isFinite(session.durationMs) && session.durationMs >= MIN_SESSION_MS;
   const uuid = () => globalThis.crypto.randomUUID();
   class SessionLog {
     constructor(storage, now = Date.now, id = uuid) {
@@ -17,6 +19,7 @@
           const saved = JSON.parse(raw);
           if (saved.version !== 1 || !Array.isArray(saved.sessions)) throw new Error('Invalid saved log');
           this.state = saved;
+          this.state.sessions = this.state.sessions.filter(qualifies);
         }
       } catch (e) { this.error = 'Saved log could not be read. Export before clearing browser data.'; this.blocked = true; }
     }
@@ -27,7 +30,7 @@
           const disk = JSON.parse(raw);
           const all = new Map((disk.sessions || []).map(s => [s.id, s]));
           this.state.sessions.forEach(s => all.set(s.id, {...s, synced: s.synced || !!all.get(s.id)?.synced}));
-          this.state.sessions = [...all.values()];
+          this.state.sessions = [...all.values()].filter(qualifies);
         }
         this.storage.setItem(KEY, JSON.stringify(this.state)); this.error = null; return true; }
       catch (e) { this.error = 'Could not save on this device. Keep this page open and export your log.'; return false; }
@@ -47,11 +50,14 @@
     finish(reason = 'hidden', at = this.now(), estimated = false) {
       const a = this.state.active; if (!a) return null;
       const end = Math.max(a.start, at);
+      if (end - a.start < MIN_SESSION_MS) {
+        this.state.active = null; this.save(); return null;
+      }
       const row = { id: a.id, start: a.start, end, durationMs: end - a.start, timezone: a.timezone,
         reason, estimated, synced: false };
       this.state.sessions.push(row); this.state.active = null; this.save(); return row;
     }
-    pending() { return this.state.sessions.filter(s => !s.synced); }
+    pending() { return this.state.sessions.filter(s => !s.synced && qualifies(s)); }
     acknowledge(ids) {
       const allowed = new Set(ids);
       this.state.sessions.forEach(s => { if (allowed.has(s.id)) s.synced = true; }); this.save();
@@ -104,5 +110,5 @@
       finally { this.busy = false; }
     }
   }
-  return { SessionLog, Sync, validEndpoint, KEY };
+  return { SessionLog, Sync, validEndpoint, KEY, MIN_SESSION_MS };
 });

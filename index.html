@@ -228,7 +228,7 @@
     <dialog id="session-dialog" aria-labelledby="log-title">
       <h2 id="log-title">Shower log</h2>
       <p id="session-count"></p><p id="log-status" role="status"></p>
-      <p>Each time this screen becomes visible starts a session. Leaving it ends the session, including switching apps or locking the screen. This records screen time, not whether you are actually showering.</p>
+      <p>Each time this screen becomes visible starts a session. Leaving it ends the session, including switching apps or locking the screen. Only sessions lasting at least one minute are saved. This records screen time, not whether you are actually showering.</p>
       <p>If iOS closes the app without a final event, the end is marked estimated from the last saved checkpoint. Clearing website data removes local records.</p>
       <button id="log-export">Export CSV backup</button>
       <details><summary>Google Sheets connection</summary>
@@ -413,7 +413,7 @@
 
         window.addEventListener('resize', protectScreen);
     </script>
-    <script src="session-log.js?v=2"></script>
+    <script src="session-log.js?v=3"></script>
     <script src="session-ui.js?v=2"></script>
 </body>
 </html>

@@ -75,7 +75,7 @@ test('queued uploads are acknowledged only after the spreadsheet confirms them',
     getItem: k => values.get(k) ?? null, setItem: (k, v) => values.set(k, v)
   }, () => 2000, () => 'test-session');
   log.start();
-  log.finish();
+  log.finish('hidden', 62000);
   const config = { url: 'https://script.google.com/macros/s/test/exec', token: 'a'.repeat(64) };
   let receipt = { ok: true, queued: ['test-session'], accepted: [] };
   const sync = new api.Sync(log, () => config, async () => ({ ok: true, json: async () => receipt }));
